@@ -3,8 +3,13 @@ package me.bryanlau.goalbuddiesandroid;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -14,59 +19,25 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import me.bryanlau.goalbuddiesandroid.Requests.LoginRequest;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity {
+    LocalBroadcastManager broadcastManager = null;
+    BroadcastReceiver loginBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            showProgress(false);
+            Bundle extras = intent.getExtras();
+            boolean loginSuccess = extras.getBoolean("success");
+            Toast.makeText(getApplicationContext(), Boolean.toString(loginSuccess), Toast.LENGTH_LONG).show();
+        }
+    };
 
-    private RequestQueue queue = null;
-
-    private TextView testview = null;
-
-    private Response.Listener<JSONObject> loginSuccessListener() {
-        return new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                showProgress(false);
-
-                try {
-                    String token = (String) response.get("token");
-                    testview.setText(token);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                /*
-                try {
-                    mTvResult.setText(response.getString("one"));
-                } catch (JSONException e) {
-                    mTvResult.setText("Parse error");
-                }*/
-            }
-        };
-    }
-
-    private Response.ErrorListener loginErrorListener() {
-        return new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                showProgress(false);
-                testview.setText(Integer.toString(error.networkResponse.statusCode));
-
-                //mTvResult.setText(error.getMessage());
-            }
-        };
-    }
 
     // UI references.
     private EditText mUsernameView;
@@ -103,9 +74,11 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-        queue = Volley.newRequestQueue(getApplicationContext());
 
-        testview = (TextView) findViewById(R.id.test);
+        IntentFilter filter = new IntentFilter("goalbuddies.login");
+
+        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        broadcastManager.registerReceiver(loginBroadcastReceiver, filter);
     }
 
 
@@ -149,24 +122,9 @@ public class LoginActivity extends AppCompatActivity {
             // perform the user login attempt.
             showProgress(true);
 
-            /*
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);*/
-            JSONObject postParameters = new JSONObject();
-            try {
-                postParameters.put("username", username);
-                postParameters.put("password", password);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            JsonObjectRequest jsObjRequest = new JsonObjectRequest(
-                    Request.Method.POST,
-                    "http://goalbuddies.bryanlau.me/api/users/login",
-                    postParameters,
-                    loginSuccessListener(),
-                    loginErrorListener());
-            queue.add(jsObjRequest);
+            // Send the request using the reusable class
+            LoginRequest request = new LoginRequest(getApplicationContext());
+            request.execute(username, password);
         }
     }
 
