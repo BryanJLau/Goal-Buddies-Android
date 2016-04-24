@@ -7,11 +7,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,11 +36,18 @@ public class LoginActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             showProgress(false);
             Bundle extras = intent.getExtras();
-            boolean loginSuccess = extras.getBoolean("success");
-            Toast.makeText(getApplicationContext(), Boolean.toString(loginSuccess), Toast.LENGTH_LONG).show();
+            if(extras.getBoolean("success")) {
+                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(i);
+            } else {
+                mUsernameView.setError("Incorrect username/password combination.");
+            }
         }
     };
 
+    // Return codes from MainActivity
+    public static final int RESULT_BACK = 0;
+    public static final int RESULT_LOGOUT = 1;
 
     // UI references.
     private EditText mUsernameView;
@@ -48,6 +58,17 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check for token on startup
+
+        SharedPreferences preferences =
+                PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        if(preferences.contains("token")) {
+            Intent i = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(i);
+        }
+
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username);
@@ -80,7 +101,6 @@ public class LoginActivity extends AppCompatActivity {
         broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         broadcastManager.registerReceiver(loginBroadcastReceiver, filter);
     }
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
