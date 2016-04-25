@@ -1,6 +1,20 @@
 <resources>
     <string name="app_name">Goal Buddies</string>
 
+    <!-- Strings related to nav menu -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_goals_current_header">Goals In Progress</string>
+    <string name="nav_goals_finished_header">Finished Goals</string>
+    <string name="nav_goals_recurring">Recurring</string>
+    <string name="nav_goals_onetime">One-Time</string>
+    <string name="nav_social_header">Social</string>
+    <string name="nav_social_friends">Friends</string>
+    <string name="nav_social_incoming">Incoming Requests</string>
+    <string name="nav_social_blocked">Blocked</string>
+    <string name="nav_technical_header">Technical</string>
+    <string name="nav_technical_about">About</string>
+    <string name="nav_technical_logout">Logout</string>
+
     <!-- Strings related to login -->
     <string name="login_prompt_username">Username</string>
     <string name="login_prompt_password">Password</string>
@@ -16,4 +30,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

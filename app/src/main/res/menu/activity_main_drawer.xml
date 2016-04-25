@@ -3,33 +3,68 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
+            android:id="@+id/nav_dashboard"
             android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="@string/nav_dashboard" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="@string/nav_goals_current_header">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_current_recurring"
+                    android:icon="@drawable/ic_menu_share"
+                    android:title="@string/nav_goals_recurring" />
+                <item
+                    android:id="@+id/nav_current_onetime"
+                    android:icon="@drawable/ic_menu_share"
+                    android:title="@string/nav_goals_onetime" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="@string/nav_goals_finished_header">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_finished_recurring"
+                    android:icon="@drawable/ic_menu_share"
+                    android:title="@string/nav_goals_recurring" />
+                <item
+                    android:id="@+id/nav_finished_onetime"
+                    android:icon="@drawable/ic_menu_share"
+                    android:title="@string/nav_goals_onetime" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="@string/nav_social_header">
         <menu>
             <item
-                android:id="@+id/nav_share"
+                android:id="@+id/nav_friends"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="@string/nav_social_friends" />
             <item
-                android:id="@+id/nav_send"
+                android:id="@+id/nav_incoming"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:title="@string/nav_social_incoming" />
+            <item
+                android:id="@+id/nav_blocked"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/nav_social_blocked" />
+        </menu>
+    </item>
+
+    <item android:title="@string/nav_technical_header">
+        <menu>
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/ic_menu_share"
+                android:title="@string/nav_technical_about" />
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/nav_technical_logout" />
         </menu>
     </item>
 
