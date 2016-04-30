@@ -1,5 +1,9 @@
 package me.bryanlau.goalbuddiesandroid;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,6 +14,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.ListFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
@@ -17,6 +23,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,36 +43,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
+import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
+import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
 
 public class MainActivity extends AppCompatActivity
         implements MainGoalFragment.OnFragmentInteractionListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-    private Response.Listener<JSONObject> loginSuccessListener() {
-        return new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONArray goalsArray = response.getJSONArray("goals");
-                    Toast.makeText(getApplicationContext(), goalsArray.toString(), Toast.LENGTH_LONG).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-    }
-
-    private Response.ErrorListener loginErrorListener() {
-        return new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
-            }
-        };
-    }
-
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+
+    LocalBroadcastManager broadcastManager = null;
+    BroadcastReceiver goalListBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+
+            int statusCode = extras.getInt("statusCode");
+            if(RequestUtils.isOk(statusCode)) {
+                //mSectionsPagerAdapter.getItem(0).getListView().invalidateViews();
+            } else if(RequestUtils.isBad(statusCode)) {
+                // Unauthorized, expired token most likely
+                // For simplicity, just redirect to login screen
+                // in case password was changed
+                Toast.makeText(getApplicationContext(),
+                        "Your login has expired, please login again!",
+                        Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +80,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -94,25 +99,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        JsonObjectRequest loginRequest = new JsonObjectRequest(
-                Request.Method.GET,
-                "http://goalbuddies.bryanlau.me/api/goals/list",
-                null,
-                loginSuccessListener(),
-                loginErrorListener()
-        ) {
-            public Map<String, String> getHeaders() throws
-                    com.android.volley.AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("x-access-token",
-                        PreferenceManager.getDefaultSharedPreferences(
-                                getApplicationContext()).getString("token", ""));
-                return params;
-            }
-        };
-
-        Volley.newRequestQueue(getApplicationContext()).add(loginRequest);
-
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -121,6 +107,14 @@ public class MainActivity extends AppCompatActivity
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pagerTabStrip);
+
+        GoalListRequest request = new GoalListRequest(getApplicationContext());
+        request.execute();
+
+        IntentFilter filter = new IntentFilter("goalbuddies.goalList");
+
+        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        broadcastManager.registerReceiver(goalListBroadcastReceiver, filter);
     }
 
     @Override
@@ -203,7 +197,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        public Fragment getItem(int position) {
+        public ListFragment getItem(int position) {
             switch(position) {
                 case 1:
                     return MainGoalFragment.newInstance(

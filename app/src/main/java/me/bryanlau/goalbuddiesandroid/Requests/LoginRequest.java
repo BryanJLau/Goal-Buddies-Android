@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -15,6 +16,8 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
 
 public class LoginRequest {
     private SharedPreferences preferences = null;
@@ -35,7 +38,8 @@ public class LoginRequest {
 
                     // Send the broadcast so that the LoginActivity knows
                     Intent loginIntent = new Intent("goalbuddies.login");
-                    loginIntent.putExtra("success", true);
+                    loginIntent.putExtra("statusCode", HttpURLConnection.HTTP_OK);
+
                     broadcastManager.sendBroadcast(loginIntent);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -49,7 +53,8 @@ public class LoginRequest {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Intent loginIntent = new Intent("goalbuddies.login");
-                loginIntent.putExtra("success", false);
+                loginIntent.putExtra("statusCode", RequestUtils.getStatusCode(error));
+                loginIntent.putExtra("error", RequestUtils.getUserError(error));
                 broadcastManager.sendBroadcast(loginIntent);
             }
         };
@@ -63,6 +68,13 @@ public class LoginRequest {
     }
 
     public void execute(String username, String password) {
+        // Store the username and password for reuse on token expire
+        // Okay if fails, because it'll be changed on re-execute
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("username", username);
+        editor.putString("password", password);
+        editor.apply();
+
         JSONObject postParameters = new JSONObject();
         try {
             postParameters.put("username", username);

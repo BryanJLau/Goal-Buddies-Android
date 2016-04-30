@@ -4,13 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Goal implements Parcelable {
-    public String m_id, m_description, m_finished, m_eta, m_created;
-    public int m_type, m_version, m_times, m_icon;
+    public String m_id, m_description, m_finished, m_eta, m_created, m_icon;
+    public int m_type, m_version, m_times;
     public boolean m_unread, m_pending;
 
     public Goal(String id, int type, String description, int version,
                 int times, String finished, String eta, String created,
-                boolean unread, boolean pending, int icon) {
+                boolean unread, boolean pending, String icon) {
         m_id = id;
         m_type = type;
         m_description = description;
@@ -33,7 +33,7 @@ public class Goal implements Parcelable {
         m_type = in.readInt();
         m_version = in.readInt();
         m_times = in.readInt();
-        m_icon = in.readInt();
+        m_icon = in.readString();
         m_unread = in.readByte() != 0x00;
         m_pending = in.readByte() != 0x00;
     }
@@ -53,7 +53,7 @@ public class Goal implements Parcelable {
         dest.writeInt(m_type);
         dest.writeInt(m_version);
         dest.writeInt(m_times);
-        dest.writeInt(m_icon);
+        dest.writeString(m_icon);
         dest.writeByte((byte) (m_unread ? 0x01 : 0x00));
         dest.writeByte((byte) (m_pending ? 0x01 : 0x00));
     }

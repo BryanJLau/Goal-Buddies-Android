@@ -23,10 +23,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import me.bryanlau.goalbuddiesandroid.Requests.LoginRequest;
+import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
 
-/**
- * A login screen that offers login via email/password.
- */
 public class LoginActivity extends AppCompatActivity {
     LocalBroadcastManager broadcastManager = null;
     BroadcastReceiver loginBroadcastReceiver = new BroadcastReceiver() {
@@ -34,18 +32,16 @@ public class LoginActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             showProgress(false);
             Bundle extras = intent.getExtras();
-            if(extras.getBoolean("success")) {
+
+            int statusCode = extras.getInt("statusCode");
+            if(RequestUtils.isOk(statusCode)) {
                 Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(i);
-            } else {
-                mUsernameView.setError("Incorrect username/password combination.");
+            } else if(RequestUtils.isBad(statusCode)) {
+                mUsernameView.setError(extras.getString("error"));
             }
         }
     };
-
-    // Return codes from MainActivity
-    public static final int RESULT_BACK = 0;
-    public static final int RESULT_LOGOUT = 1;
 
     // UI references.
     private EditText mUsernameView;
