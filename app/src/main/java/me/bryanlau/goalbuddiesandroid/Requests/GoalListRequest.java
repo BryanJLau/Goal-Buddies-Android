@@ -79,7 +79,7 @@ public class GoalListRequest {
     public void execute() {
         JsonObjectRequest goalListRequest = new JsonObjectRequest(
                 Request.Method.GET,
-                "http://goalbuddies.bryanlau.me/api/goals/list",
+                "http://goalbuddies.bryanlau.me/api/goals/list?all=true",
                 null,
                 goalListSuccessListener(),
                 goalListErrorListener()

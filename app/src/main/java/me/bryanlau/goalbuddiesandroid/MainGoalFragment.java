@@ -7,10 +7,16 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 import me.bryanlau.goalbuddiesandroid.Goals.Goal;
+import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
+import me.bryanlau.goalbuddiesandroid.Goals.GoalListAdapter;
 
 
 /**
@@ -22,9 +28,10 @@ import me.bryanlau.goalbuddiesandroid.Goals.Goal;
  * create an instance of this fragment.
  */
 public class MainGoalFragment extends android.support.v4.app.ListFragment {
-    private ArrayList<Goal> goalList;
-
     private OnFragmentInteractionListener mListener;
+    private int position;
+    private GoalListAdapter adapter;
+    private ArrayList<Goal> goalList;
 
     public MainGoalFragment() {
         // Required empty public constructor
@@ -34,14 +41,14 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param goals The array of goals.
+     * @param position The position of the fragment
      * @return A new instance of fragment MainGoalFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MainGoalFragment newInstance(ArrayList<Goal> goals) {
+    public static MainGoalFragment newInstance(int position) {
         MainGoalFragment fragment = new MainGoalFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList("goalList", goals);
+        args.putInt("position", position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -49,16 +56,70 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            goalList = getArguments().getParcelableArrayList("goalList");
-        }
+
+        position = getArguments().getInt("position");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        super.onCreateView(inflater, container, savedInstanceState);
+
         return inflater.inflate(R.layout.fragment_main_goal, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        switch(position) {
+            case 0:
+                goalList = GoalContainer.INSTANCE.getPendingRecurring();
+                break;
+            case 1:
+                goalList = GoalContainer.INSTANCE.getPendingOneTime();
+                break;
+            case 2:
+                goalList = GoalContainer.INSTANCE.getFinishedRecurring();
+                break;
+            case 3:
+                goalList = GoalContainer.INSTANCE.getFinishedOneTime();
+                break;
+            default:
+                goalList = new ArrayList<>();
+        }
+
+        adapter = new GoalListAdapter(getActivity(), goalList);
+        setListAdapter(adapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        switch(position) {
+            case 0:
+                goalList = GoalContainer.INSTANCE.getPendingRecurring();
+                break;
+            case 1:
+                goalList = GoalContainer.INSTANCE.getPendingOneTime();
+                break;
+            case 2:
+                goalList = GoalContainer.INSTANCE.getFinishedRecurring();
+                break;
+            case 3:
+                goalList = GoalContainer.INSTANCE.getFinishedOneTime();
+                break;
+            default:
+                goalList = new ArrayList<>();
+        }
+
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // TODO implement some logic
     }
 
     // TODO: Rename method, update argument and hook method into UI event

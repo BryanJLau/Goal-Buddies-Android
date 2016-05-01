@@ -14,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
@@ -40,6 +41,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
@@ -53,15 +55,29 @@ public class MainActivity extends AppCompatActivity
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
-    LocalBroadcastManager broadcastManager = null;
-    BroadcastReceiver goalListBroadcastReceiver = new BroadcastReceiver() {
+    private LocalBroadcastManager broadcastManager;
+    private BroadcastReceiver goalListBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
             if(RequestUtils.isOk(statusCode)) {
-                //mSectionsPagerAdapter.getItem(0).getListView().invalidateViews();
+                // So we can't actually call the adapter to refresh
+                // because the content view is *never* created.
+                // We'll just take out the fragment and put it back
+                // to "simulate" a refresh
+                FragmentManager fragmentManager = getSupportFragmentManager();
+
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                List<Fragment> fragments = fragmentManager.getFragments();
+
+                // This will throw an exception on hot deploy when developing
+                for(Fragment f : fragments) {
+                    transaction.detach(f).attach(f);
+                }
+
+                transaction.commit();
             } else if(RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
@@ -108,13 +124,18 @@ public class MainActivity extends AppCompatActivity
         mViewPager.setAdapter(mSectionsPagerAdapter);
         PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pagerTabStrip);
 
-        GoalListRequest request = new GoalListRequest(getApplicationContext());
-        request.execute();
-
         IntentFilter filter = new IntentFilter("goalbuddies.goalList");
 
         broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         broadcastManager.registerReceiver(goalListBroadcastReceiver, filter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        GoalListRequest request = new GoalListRequest(getApplicationContext());
+        request.execute();
     }
 
     @Override
@@ -144,12 +165,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            SharedPreferences preferences =
-                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            // Commit because we need to purge it NOW
-            preferences.edit().clear().commit();
-
-            finish();
+            GoalListRequest request = new GoalListRequest(getApplicationContext());
+            request.execute();
             return true;
         }
 
@@ -197,30 +214,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        public ListFragment getItem(int position) {
-            switch(position) {
-                case 1:
-                    return MainGoalFragment.newInstance(
-                            GoalContainer.INSTANCE.getPendingRecurring()
-                    );
-                case 2:
-                    return MainGoalFragment.newInstance(
-                            GoalContainer.INSTANCE.getPendingOneTime()
-                    );
-                case 3:
-                    return MainGoalFragment.newInstance(
-                            GoalContainer.INSTANCE.getFinishedRecurring()
-                    );
-                case 4:
-                    return MainGoalFragment.newInstance(
-                            GoalContainer.INSTANCE.getFinishedOneTime()
-                    );
-                // It shouldn't get here but we'll handle it anyway
-                default:
-                    return MainGoalFragment.newInstance(
-                            null
-                    );
-            }
+        public MainGoalFragment getItem(int position) {
+            return MainGoalFragment.newInstance(position);
         }
 
         @Override
