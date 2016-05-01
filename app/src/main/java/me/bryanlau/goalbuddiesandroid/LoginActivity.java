@@ -138,7 +138,7 @@ public class LoginActivity extends AppCompatActivity {
 
             // Send the request using the reusable class
             LoginRequest request = new LoginRequest(getApplicationContext());
-            request.execute(username, password);
+            request.execute(getApplicationContext(), username, password);
         }
     }
 

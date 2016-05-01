@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,6 +18,7 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 
 public class LoginRequest {
@@ -67,7 +69,15 @@ public class LoginRequest {
         broadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
-    public void execute(String username, String password) {
+    public void execute(Context context, String username, String password) {
+        if(!RequestUtils.isNetworkAvailable(context)) {
+            Intent loginIntent = new Intent("goalbuddies.login");
+            loginIntent.putExtra("statusCode", HttpURLConnection.HTTP_BAD_REQUEST);
+            loginIntent.putExtra("error", "Please enable your internet connection.");
+            broadcastManager.sendBroadcast(loginIntent);
+            return;
+        }
+
         // Store the username and password for reuse on token expire
         // Okay if fails, because it'll be changed on re-execute
         SharedPreferences.Editor editor = preferences.edit();

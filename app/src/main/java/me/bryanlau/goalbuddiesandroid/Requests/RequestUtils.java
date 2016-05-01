@@ -1,5 +1,8 @@
 package me.bryanlau.goalbuddiesandroid.Requests;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.Nullable;
 
 import com.android.volley.VolleyError;
@@ -18,6 +21,13 @@ public final class RequestUtils {
 
     public static boolean isBad(int statusCode) {
         return (statusCode >= 400 && statusCode < 500);
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public static int getStatusCode(VolleyError error) {
