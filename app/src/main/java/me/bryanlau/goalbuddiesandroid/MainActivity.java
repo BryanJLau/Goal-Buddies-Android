@@ -4,10 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -15,7 +13,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.ListFragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerTabStrip;
@@ -24,36 +21,27 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
 import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
+import me.bryanlau.goalbuddiesandroid.Requests.SocialRequest;
 
 public class MainActivity extends AppCompatActivity
         implements MainGoalFragment.OnFragmentInteractionListener,
+        MainSocialFragment.OnFragmentInteractionListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private GoalsSectionsPagerAdapter mGoalsSectionsPagerAdapter;
+    private FriendsSectionsPagerAdapter mFriendsSectionsPagerAdapter;
     private ViewPager mViewPager;
+
+    private boolean currentPageGoals;
 
     private LocalBroadcastManager broadcastManager;
     private BroadcastReceiver goalListBroadcastReceiver = new BroadcastReceiver() {
@@ -117,17 +105,24 @@ public class MainActivity extends AppCompatActivity
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mGoalsSectionsPagerAdapter = new GoalsSectionsPagerAdapter(getSupportFragmentManager());
+        mFriendsSectionsPagerAdapter = new FriendsSectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setAdapter(mGoalsSectionsPagerAdapter);
         PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pagerTabStrip);
 
         IntentFilter filter = new IntentFilter("goalbuddies.goalList");
+        IntentFilter socialFilter = new IntentFilter("goalbuddies.social");
 
         broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         broadcastManager.registerReceiver(goalListBroadcastReceiver, filter);
+        broadcastManager.registerReceiver(goalListBroadcastReceiver, socialFilter);
+
+        currentPageGoals = true;
+
+        setTitle("My Goals");
     }
 
     @Override
@@ -164,7 +159,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
             GoalListRequest request = new GoalListRequest(getApplicationContext());
             request.execute();
             return true;
@@ -178,20 +173,97 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-/*
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        switch(id) {
+            case R.id.nav_current_recurring:
+            case R.id.nav_current_onetime:
+            case R.id.nav_finished_recurring:
+            case R.id.nav_finished_onetime:
+                if(!currentPageGoals) {
+                    currentPageGoals = true;
 
-        } else if (id == R.id.nav_slideshow) {
+                    GoalListRequest request = new GoalListRequest(getApplicationContext());
+                    request.execute();
 
-        } else if (id == R.id.nav_manage) {
+                    FragmentManager fragmentManager = getSupportFragmentManager();
 
-        } else if (id == R.id.nav_share) {
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    List<Fragment> fragments = fragmentManager.getFragments();
 
-        } else if (id == R.id.nav_send) {
+                    // This will throw an exception on hot deploy when developing
+                    for(Fragment f : fragments) {
+                        transaction.detach(f);
+                        transaction.remove(f);
+                    }
 
-        }*/
+                    for(int i = 0; i < mGoalsSectionsPagerAdapter.getCount(); i++) {
+                        Fragment f = mGoalsSectionsPagerAdapter.getItem(i);
+                        transaction.add(f, Integer.toString(i));
+                        transaction.attach(f);
+                    }
+
+                    transaction.commit();
+                }
+
+                setTitle("My Goals");
+                mViewPager.setAdapter(mGoalsSectionsPagerAdapter);
+                break;
+            case R.id.nav_friends:
+            case R.id.nav_incoming:
+            case R.id.nav_blocked:
+                if(currentPageGoals) {
+                    currentPageGoals = false;
+
+                    SocialRequest request = new SocialRequest(getApplicationContext());
+                    request.execute();
+
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    List<Fragment> fragments = fragmentManager.getFragments();
+
+                    // This will throw an exception on hot deploy when developing
+                    for(Fragment f : fragments) {
+                        transaction.detach(f);
+                        transaction.remove(f);
+                    }
+
+                    for(int i = 0; i < mFriendsSectionsPagerAdapter.getCount(); i++) {
+                        Fragment f = mFriendsSectionsPagerAdapter.getItem(i);
+                        transaction.add(f, Integer.toString(i));
+                        transaction.attach(f);
+                    }
+
+                    transaction.commit();
+                }
+
+                setTitle("Social");
+                mViewPager.setAdapter(mFriendsSectionsPagerAdapter);
+                break;
+            case R.id.nav_about:
+                Intent i = new Intent(MainActivity.this, AboutActivity.class);
+                startActivity(i);
+                break;
+        }
+
+        switch(id) {
+            case R.id.nav_current_recurring:
+            case R.id.nav_friends:
+                mViewPager.setCurrentItem(0, true);
+                break;
+            case R.id.nav_current_onetime:
+            case R.id.nav_incoming:
+                mViewPager.setCurrentItem(1, true);
+                break;
+            case R.id.nav_finished_recurring:
+            case R.id.nav_blocked:
+                mViewPager.setCurrentItem(2, true);
+                break;
+            case R.id.nav_finished_onetime:
+                mViewPager.setCurrentItem(3, true);
+                break;
+        }
+
+        mViewPager.getAdapter().notifyDataSetChanged();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -207,9 +279,9 @@ public class MainActivity extends AppCompatActivity
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class GoalsSectionsPagerAdapter extends FragmentPagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public GoalsSectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
@@ -234,6 +306,40 @@ public class MainActivity extends AppCompatActivity
                     return "Finished Recurring";
                 case 3:
                     return "Finished One Time";
+            }
+            return null;
+        }
+    }
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class FriendsSectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public FriendsSectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public MainSocialFragment getItem(int position) {
+            return MainSocialFragment.newInstance(position);
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Friends";
+                case 1:
+                    return "Pending Requests";
+                case 2:
+                    return "Blocked";
             }
             return null;
         }

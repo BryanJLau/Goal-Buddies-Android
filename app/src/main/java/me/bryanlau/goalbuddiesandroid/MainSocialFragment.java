@@ -7,13 +7,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
-import me.bryanlau.goalbuddiesandroid.Goals.Goal;
-import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
-import me.bryanlau.goalbuddiesandroid.Goals.GoalListAdapter;
+import me.bryanlau.goalbuddiesandroid.Social.SocialContainer;
 
 
 /**
@@ -24,13 +23,13 @@ import me.bryanlau.goalbuddiesandroid.Goals.GoalListAdapter;
  * Use the {@link MainGoalFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MainGoalFragment extends android.support.v4.app.ListFragment {
+public class MainSocialFragment extends android.support.v4.app.ListFragment {
     private OnFragmentInteractionListener mListener;
     private int position;
-    private GoalListAdapter adapter;
-    private ArrayList<Goal> goalList;
+    private ArrayList<String> socialList;
+    private ArrayAdapter<String> adapter;
 
-    public MainGoalFragment() {
+    public MainSocialFragment() {
         // Required empty public constructor
     }
 
@@ -42,8 +41,8 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
      * @return A new instance of fragment MainGoalFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MainGoalFragment newInstance(int position) {
-        MainGoalFragment fragment = new MainGoalFragment();
+    public static MainSocialFragment newInstance(int position) {
+        MainSocialFragment fragment = new MainSocialFragment();
         Bundle args = new Bundle();
         args.putInt("position", position);
         fragment.setArguments(args);
@@ -62,31 +61,15 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        return inflater.inflate(R.layout.fragment_main_goal, container, false);
+        return inflater.inflate(R.layout.fragment_main_social, container, false);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        switch(position) {
-            case 0:
-                goalList = GoalContainer.INSTANCE.getPendingRecurring();
-                break;
-            case 1:
-                goalList = GoalContainer.INSTANCE.getPendingOneTime();
-                break;
-            case 2:
-                goalList = GoalContainer.INSTANCE.getFinishedRecurring();
-                break;
-            case 3:
-                goalList = GoalContainer.INSTANCE.getFinishedOneTime();
-                break;
-            default:
-                goalList = new ArrayList<>();
-        }
-
-        adapter = new GoalListAdapter(getActivity(), goalList);
+        adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_list_item_1, socialList);
         setListAdapter(adapter);
     }
 
@@ -96,19 +79,16 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
 
         switch(position) {
             case 0:
-                goalList = GoalContainer.INSTANCE.getPendingRecurring();
+                socialList = SocialContainer.INSTANCE.friends;
                 break;
             case 1:
-                goalList = GoalContainer.INSTANCE.getPendingOneTime();
+                socialList = SocialContainer.INSTANCE.pending;
                 break;
             case 2:
-                goalList = GoalContainer.INSTANCE.getFinishedRecurring();
-                break;
-            case 3:
-                goalList = GoalContainer.INSTANCE.getFinishedOneTime();
+                socialList = SocialContainer.INSTANCE.blocked;
                 break;
             default:
-                goalList = new ArrayList<>();
+                socialList = new ArrayList<>();
         }
 
         adapter.notifyDataSetChanged();
@@ -132,19 +112,16 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
 
         switch(position) {
             case 0:
-                goalList = GoalContainer.INSTANCE.getPendingRecurring();
+                socialList = SocialContainer.INSTANCE.friends;
                 break;
             case 1:
-                goalList = GoalContainer.INSTANCE.getPendingOneTime();
+                socialList = SocialContainer.INSTANCE.pending;
                 break;
             case 2:
-                goalList = GoalContainer.INSTANCE.getFinishedRecurring();
-                break;
-            case 3:
-                goalList = GoalContainer.INSTANCE.getFinishedOneTime();
+                socialList = SocialContainer.INSTANCE.blocked;
                 break;
             default:
-                goalList = new ArrayList<>();
+                socialList = new ArrayList<>();
         }
 
         if (context instanceof OnFragmentInteractionListener) {

@@ -29,8 +29,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_refresh">Refresh</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="empty_goal_list">No goals found, make one today!</string>
+    <string name="empty_friend_list">No social interactions found, connect today!</string>
 </resources>
