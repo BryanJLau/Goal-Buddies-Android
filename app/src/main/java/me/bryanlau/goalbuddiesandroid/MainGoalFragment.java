@@ -93,24 +93,6 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        switch(position) {
-            case 0:
-                goalList = GoalContainer.INSTANCE.getPendingRecurring();
-                break;
-            case 1:
-                goalList = GoalContainer.INSTANCE.getPendingOneTime();
-                break;
-            case 2:
-                goalList = GoalContainer.INSTANCE.getFinishedRecurring();
-                break;
-            case 3:
-                goalList = GoalContainer.INSTANCE.getFinishedOneTime();
-                break;
-            default:
-                goalList = new ArrayList<>();
-        }
-
         adapter.notifyDataSetChanged();
     }
 
@@ -129,23 +111,6 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        switch(position) {
-            case 0:
-                goalList = GoalContainer.INSTANCE.getPendingRecurring();
-                break;
-            case 1:
-                goalList = GoalContainer.INSTANCE.getPendingOneTime();
-                break;
-            case 2:
-                goalList = GoalContainer.INSTANCE.getFinishedRecurring();
-                break;
-            case 3:
-                goalList = GoalContainer.INSTANCE.getFinishedOneTime();
-                break;
-            default:
-                goalList = new ArrayList<>();
-        }
 
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;

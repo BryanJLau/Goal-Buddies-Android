@@ -54,7 +54,6 @@ public class SocialRequest {
                         }
 
                         SocialContainer.INSTANCE.friends = friendsList;
-
                         friendsSuccess = true;
                     }
                 } catch (JSONException e) {
@@ -89,7 +88,6 @@ public class SocialRequest {
                         }
 
                         SocialContainer.INSTANCE.pending = pendingList;
-
                         incomingSuccess = true;
                     }
                 } catch (JSONException e) {
@@ -124,7 +122,6 @@ public class SocialRequest {
                         }
 
                         SocialContainer.INSTANCE.blocked = blockedList;
-
                         blockedSuccess = true;
                     }
                 } catch (JSONException e) {

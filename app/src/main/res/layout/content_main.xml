@@ -28,18 +28,32 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/container"
+        android:id="@+id/goalViewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v4.view.PagerTabStrip
-            android:id="@+id/pagerTabStrip"
+            android:id="@+id/goalPagerTabStrip"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_gravity="top" >
         </android.support.v4.view.PagerTabStrip>
     </android.support.v4.view.ViewPager>
 
+    <android.support.v4.view.ViewPager
+        android:id="@+id/socialViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <android.support.v4.view.PagerTabStrip
+            android:id="@+id/socialPagerTabStrip"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_gravity="top" >
+        </android.support.v4.view.PagerTabStrip>
+    </android.support.v4.view.ViewPager>
 
 </android.support.design.widget.CoordinatorLayout>

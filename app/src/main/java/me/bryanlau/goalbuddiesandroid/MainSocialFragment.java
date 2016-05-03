@@ -67,16 +67,6 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        adapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_1, socialList);
-        setListAdapter(adapter);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
         switch(position) {
             case 0:
                 socialList = SocialContainer.INSTANCE.friends;
@@ -91,6 +81,14 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
                 socialList = new ArrayList<>();
         }
 
+        adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_list_item_1, socialList);
+        setListAdapter(adapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         adapter.notifyDataSetChanged();
     }
 
@@ -109,20 +107,6 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        switch(position) {
-            case 0:
-                socialList = SocialContainer.INSTANCE.friends;
-                break;
-            case 1:
-                socialList = SocialContainer.INSTANCE.pending;
-                break;
-            case 2:
-                socialList = SocialContainer.INSTANCE.blocked;
-                break;
-            default:
-                socialList = new ArrayList<>();
-        }
 
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
