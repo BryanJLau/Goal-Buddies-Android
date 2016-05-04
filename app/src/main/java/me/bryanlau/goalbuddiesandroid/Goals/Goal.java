@@ -3,6 +3,9 @@ package me.bryanlau.goalbuddiesandroid.Goals;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Goal implements Parcelable {
     public String m_id, m_description, m_finished, m_eta, m_created, m_icon;
     public int m_type, m_version, m_times;
@@ -22,6 +25,24 @@ public class Goal implements Parcelable {
         m_unread = unread;
         m_pending = pending;
         m_icon = icon;
+    }
+
+    public Goal(JSONObject goal) {
+        try {
+            m_id = goal.getString("_id");
+            m_type = goal.getInt("type");
+            m_description = goal.getString("description");
+            m_version = goal.getInt("version");
+            m_times = goal.getInt("times");
+            m_finished = goal.getString("finished");
+            m_eta = goal.getString("eta");
+            m_created = goal.getString("created");
+            m_unread = goal.getBoolean("unread");
+            m_pending = goal.getBoolean("pending");
+            m_icon = goal.getString("icon");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     protected Goal(Parcel in) {

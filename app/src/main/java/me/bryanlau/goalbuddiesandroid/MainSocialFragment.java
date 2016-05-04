@@ -1,6 +1,7 @@
 package me.bryanlau.goalbuddiesandroid;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,7 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
+import me.bryanlau.goalbuddiesandroid.Social.ProfileActivity;
 import me.bryanlau.goalbuddiesandroid.Social.SocialContainer;
 
 
@@ -95,6 +97,10 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         // TODO implement some logic
+        String username = socialList.get(position);
+        Intent i = new Intent(getActivity(), ProfileActivity.class);
+        i.putExtra("username", username);
+        startActivity(i);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

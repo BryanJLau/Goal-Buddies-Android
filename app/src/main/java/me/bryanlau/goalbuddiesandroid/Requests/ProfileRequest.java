@@ -10,51 +10,63 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.bryanlau.goalbuddiesandroid.Social.SocialContainer;
+import me.bryanlau.goalbuddiesandroid.Goals.Goal;
+import me.bryanlau.goalbuddiesandroid.Users.User;
 
-public class SocialRequest {
+public class ProfileRequest {
     private SharedPreferences preferences = null;
     private RequestQueue queue = null;
     LocalBroadcastManager broadcastManager = null;
 
-    private boolean friendsSuccess;
-    private boolean incomingSuccess;
-    private boolean blockedSuccess;
+    private boolean userSuccess;
+    private boolean recurringGoalsSuccess;
+    private boolean onetimeGoalsSuccess;
     private boolean encounteredError;
 
+    private String mUsername;
+    private User user;
+    private ArrayList<Goal> recurring;
+    private ArrayList<Goal> onetime;
+
     private void sendBroadcast() {
-        if(friendsSuccess && incomingSuccess && blockedSuccess) {
-            Intent socialIntent = new Intent("goalbuddies.social");
-            socialIntent.putExtra("statusCode", HttpURLConnection.HTTP_OK);
-            broadcastManager.sendBroadcast(socialIntent);
+        if(userSuccess && recurringGoalsSuccess && onetimeGoalsSuccess) {
+            Intent profileIntent = new Intent("goalbuddies.profile");
+            profileIntent.putExtra("user", user);
+            profileIntent.putExtra("recurring", recurring);
+            profileIntent.putExtra("onetime", onetime);
+            profileIntent.putExtra("statusCode", HttpURLConnection.HTTP_OK);
+            broadcastManager.sendBroadcast(profileIntent);
         }
     }
 
-    private Response.Listener<JSONArray> friendsSuccessListener() {
-        return new Response.Listener<JSONArray>() {
+    private Response.Listener<JSONObject> userSuccessListener() {
+        return new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONArray response) {
+            public void onResponse(JSONObject response) {
                 try {
                     if(!encounteredError) {
-                        ArrayList<String> friendsList = new ArrayList<>();
+                        JSONObject jsonUser = response.getJSONObject("user");
+                        user = new User(
+                                jsonUser.getString("username"),
+                                jsonUser.getString("firstName"),
+                                jsonUser.getString("lastName"),
+                                jsonUser.getString("city"),
+                                jsonUser.getInt("goalsCompleted")
 
-                        for (int i = 0; i < response.length(); i++) {
-                            friendsList.add(response.getString(i));
-                        }
-
-                        SocialContainer.INSTANCE.friends = friendsList;
-                        friendsSuccess = true;
+                        );
+                        userSuccess = true;
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -64,7 +76,7 @@ public class SocialRequest {
                     if(!encounteredError) {
                         encounteredError = true;
 
-                        Intent goalListIntent = new Intent("goalbuddies.social");
+                        Intent goalListIntent = new Intent("goalbuddies.profile");
                         goalListIntent.putExtra("statusCode", HttpURLConnection.HTTP_BAD_REQUEST);
                         broadcastManager.sendBroadcast(goalListIntent);
                     }
@@ -75,20 +87,20 @@ public class SocialRequest {
         };
     }
 
-    private Response.Listener<JSONArray> incomingSuccessListener() {
-        return new Response.Listener<JSONArray>() {
+    private Response.Listener<JSONObject> recurringGoalsSuccessListener() {
+        return new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONArray response) {
+            public void onResponse(JSONObject response) {
                 try {
                     if(!encounteredError) {
-                        ArrayList<String> pendingList = new ArrayList<>();
+                        recurring = new ArrayList<>();
+                        JSONArray goalsArray = response.getJSONArray("goals");
 
-                        for (int i = 0; i < response.length(); i++) {
-                            pendingList.add(response.getString(i));
+                        for (int i = 0; i < goalsArray.length(); i++) {
+                            recurring.add(new Goal(goalsArray.getJSONObject(i)));
                         }
 
-                        SocialContainer.INSTANCE.pending = pendingList;
-                        incomingSuccess = true;
+                        recurringGoalsSuccess = true;
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -98,7 +110,7 @@ public class SocialRequest {
                     if(!encounteredError) {
                         encounteredError = true;
 
-                        Intent goalListIntent = new Intent("goalbuddies.social");
+                        Intent goalListIntent = new Intent("goalbuddies.profile");
                         goalListIntent.putExtra("statusCode", HttpURLConnection.HTTP_BAD_REQUEST);
                         broadcastManager.sendBroadcast(goalListIntent);
                     }
@@ -109,20 +121,20 @@ public class SocialRequest {
         };
     }
 
-    private Response.Listener<JSONArray> blockedSuccessListener() {
-        return new Response.Listener<JSONArray>() {
+    private Response.Listener<JSONObject> onetimeGoalsSuccessListener() {
+        return new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONArray response) {
+            public void onResponse(JSONObject response) {
                 try {
                     if(!encounteredError) {
-                        ArrayList<String> blockedList = new ArrayList<>();
+                        onetime = new ArrayList<>();
+                        JSONArray goalsArray = response.getJSONArray("goals");
 
-                        for (int i = 0; i < response.length(); i++) {
-                            blockedList.add(response.getString(i));
+                        for (int i = 0; i < goalsArray.length(); i++) {
+                            onetime.add(new Goal(goalsArray.getJSONObject(i)));
                         }
 
-                        SocialContainer.INSTANCE.blocked = blockedList;
-                        blockedSuccess = true;
+                        onetimeGoalsSuccess = true;
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -132,7 +144,7 @@ public class SocialRequest {
                     if(!encounteredError) {
                         encounteredError = true;
 
-                        Intent goalListIntent = new Intent("goalbuddies.social");
+                        Intent goalListIntent = new Intent("goalbuddies.profile");
                         goalListIntent.putExtra("statusCode", HttpURLConnection.HTTP_BAD_REQUEST);
                         broadcastManager.sendBroadcast(goalListIntent);
                     }
@@ -147,7 +159,7 @@ public class SocialRequest {
         return new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Intent goalListIntent = new Intent("goalbuddies.social");
+                Intent goalListIntent = new Intent("goalbuddies.profile");
                 goalListIntent.putExtra("statusCode", RequestUtils.getStatusCode(error));
                 goalListIntent.putExtra("error", RequestUtils.getUserError(error));
                 broadcastManager.sendBroadcast(goalListIntent);
@@ -155,21 +167,24 @@ public class SocialRequest {
         };
     }
 
-    public SocialRequest(Context context) {
+    public ProfileRequest(Context context, String username) {
         // Set the shared preferences manager to edit in case login is successful
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         queue = Volley.newRequestQueue(context);
         broadcastManager = LocalBroadcastManager.getInstance(context);
 
-        friendsSuccess = incomingSuccess = blockedSuccess = encounteredError = false;
+        userSuccess = recurringGoalsSuccess =
+                onetimeGoalsSuccess = encounteredError = false;
+
+        mUsername = username;
     }
 
     public void execute() {
-        JsonArrayRequest friendsRequest = new JsonArrayRequest(
+        JsonObjectRequest userRequest = new JsonObjectRequest(
                 Request.Method.GET,
-                "http://goalbuddies.bryanlau.me/api/users/social/friends",
+                "http://goalbuddies.bryanlau.me/api/users/search/" + mUsername,
                 null,
-                friendsSuccessListener(),
+                userSuccessListener(),
                 errorListener()
         ) {
             public Map<String, String> getHeaders() throws
@@ -180,11 +195,12 @@ public class SocialRequest {
             }
         };
 
-        JsonArrayRequest incomingRequest = new JsonArrayRequest(
+        JsonObjectRequest recurringGoalsRequest = new JsonObjectRequest(
                 Request.Method.GET,
-                "http://goalbuddies.bryanlau.me/api/users/social/incoming",
+                "http://goalbuddies.bryanlau.me/api/goals/list?username=" +
+                    mUsername,
                 null,
-                incomingSuccessListener(),
+                recurringGoalsSuccessListener(),
                 errorListener()
         ) {
             public Map<String, String> getHeaders() throws
@@ -195,11 +211,12 @@ public class SocialRequest {
             }
         };
 
-        JsonArrayRequest blockedRequest = new JsonArrayRequest(
+        JsonObjectRequest onetimeGoalsRequest = new JsonObjectRequest(
                 Request.Method.GET,
-                "http://goalbuddies.bryanlau.me/api/users/social/blocked",
+                "http://goalbuddies.bryanlau.me/api/goals/list?username=" +
+                        mUsername + "&type=1",
                 null,
-                blockedSuccessListener(),
+                onetimeGoalsSuccessListener(),
                 errorListener()
         ) {
             public Map<String, String> getHeaders() throws
@@ -210,8 +227,8 @@ public class SocialRequest {
             }
         };
 
-        queue.add(friendsRequest);
-        queue.add(incomingRequest);
-        queue.add(blockedRequest);
+        queue.add(userRequest);
+        queue.add(recurringGoalsRequest);
+        queue.add(onetimeGoalsRequest);
     }
 }
