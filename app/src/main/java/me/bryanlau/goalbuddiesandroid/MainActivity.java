@@ -46,22 +46,27 @@ public class MainActivity extends AppCompatActivity
     private boolean currentPageGoals;
 
     private void refreshFragments() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        try {
+            FragmentManager fragmentManager = getSupportFragmentManager();
 
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        List<Fragment> fragments = fragmentManager.getFragments();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            List<Fragment> fragments = fragmentManager.getFragments();
 
-        // So we can't actually call the adapter to refresh
-        // because the content view is *never* created.
-        // We'll just take out the fragment and put it back
-        // to "simulate" a refresh
-        // This will throw an exception on hot deploy when developing
-        for(Fragment f : fragments) {
-            if(f != null) {
-                transaction.detach(f).attach(f);
+            // So we can't actually call the adapter to refresh
+            // because the content view is *never* created.
+            // We'll just take out the fragment and put it back
+            // to "simulate" a refresh
+            for (Fragment f : fragments) {
+                if (f != null) {
+                    transaction.detach(f).attach(f);
+                }
             }
+            transaction.commit();
+        } catch (IllegalStateException e) {
+            // Activity was destroyed, but we're still good
+            // Should not happen now that we put the refresh code in
+            // onPostResume, but we'll keep it here anyway
         }
-        transaction.commit();
     }
 
     private LocalBroadcastManager broadcastManager;
@@ -140,6 +145,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    @Override
+    public void onPostResume() {
+        super.onPostResume();
 
         GoalListRequest grequest = new GoalListRequest(getApplicationContext());
         grequest.execute();
@@ -151,11 +161,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        // This line will actually logout our user
+        //super.onBackPressed();
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
             moveTaskToBack(true);
         }
     }
@@ -244,7 +256,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_friends:
                 currentPosition = 0;
                 break;
-            case R.id.nav_current_onetime:;
+            case R.id.nav_current_onetime:
             case R.id.nav_incoming:
                 currentPosition = 1;
                 break;
