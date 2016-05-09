@@ -35,10 +35,15 @@ public class ProfileRequest {
     private boolean onetimeGoalsSuccess;
     private boolean encounteredError;
 
+    public enum RELATION {
+        NONE, FRIENDS, INCOMING, OUTGOING
+    }
+
     private String mUsername;
     private User user;
     private ArrayList<Goal> recurring;
     private ArrayList<Goal> onetime;
+    private RELATION relation;
 
     private void sendBroadcast() {
         if(userSuccess && recurringGoalsSuccess && onetimeGoalsSuccess) {
@@ -46,6 +51,7 @@ public class ProfileRequest {
             profileIntent.putExtra("user", user);
             profileIntent.putExtra("recurring", recurring);
             profileIntent.putExtra("onetime", onetime);
+            profileIntent.putExtra("relation", relation);
             profileIntent.putExtra("statusCode", HttpURLConnection.HTTP_OK);
             broadcastManager.sendBroadcast(profileIntent);
         }
@@ -64,8 +70,24 @@ public class ProfileRequest {
                                 jsonUser.getString("lastName"),
                                 jsonUser.getString("city"),
                                 jsonUser.getInt("goalsCompleted")
-
                         );
+
+                        // These arrays only have 0 or 1 item
+                        JSONArray friendsArray = jsonUser.getJSONArray("friends");
+                        JSONArray incomingArray = jsonUser.getJSONArray("incoming");
+                        JSONArray outgoingArray = jsonUser.getJSONArray("outgoing");
+
+                        if (friendsArray.length() == 1) {
+                            relation = RELATION.FRIENDS;
+                        } else if (incomingArray.length() == 1) {
+                            // Their incoming = your outgoing
+                            relation = RELATION.OUTGOING;
+                        } else if (outgoingArray.length() == 1) {
+                            relation = RELATION.INCOMING;
+                        } else {
+                            relation = RELATION.NONE;
+                        }
+
                         userSuccess = true;
                     }
                 } catch (JSONException e) {

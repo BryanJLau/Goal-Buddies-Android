@@ -27,15 +27,24 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
+import me.bryanlau.goalbuddiesandroid.Goals.Goal;
 import me.bryanlau.goalbuddiesandroid.R;
 import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
+import me.bryanlau.goalbuddiesandroid.Users.User;
 
 public class ProfileActivity extends AppCompatActivity {
     private View mProgressView;
     private View mProfileView;
+    private User mUser;
+    private ArrayList<Goal> mRecurring, mOnetime;
+    ProfileRequest.RELATION relation;
 
-    private BroadcastReceiver goalListBroadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver profileBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle extras = intent.getExtras();
@@ -44,10 +53,14 @@ public class ProfileActivity extends AppCompatActivity {
             if(RequestUtils.isOk(statusCode)) {
                 showProgress(false);
 
-                View container = findViewById(R.id.main_content);
-                if(container != null)
-                    Snackbar.make(container, "Refreshed", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                mUser = extras.getParcelable("user");
+                mRecurring = extras.getParcelableArrayList("recurring");
+                mOnetime = extras.getParcelableArrayList("onetime");
+
+                relation =
+                        (ProfileRequest.RELATION) intent.getSerializableExtra("relation");
+                invalidateOptionsMenu();
+
             } else if(RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
@@ -59,6 +72,39 @@ public class ProfileActivity extends AppCompatActivity {
             }
         }
     };
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        MenuItem[] menuButtons = {null, null};
+
+        if(relation != null) {
+            switch (relation) {
+                case FRIENDS:
+                    menuButtons[0] = menu.findItem(R.id.action_unfriend);
+                    break;
+                case INCOMING:
+                    menuButtons[0] = menu.findItem(R.id.action_accept);
+                    menuButtons[1] = menu.findItem(R.id.action_decline);
+                    break;
+                case OUTGOING:
+                    menuButtons[0] = menu.findItem(R.id.action_cancel);
+                    break;
+                case NONE:
+                    menuButtons[0] = menu.findItem(R.id.action_add);
+                    menuButtons[1] = menu.findItem(R.id.action_block);
+                    break;
+            }
+
+            for (MenuItem button : menuButtons) {
+                if (button != null)
+                    button.setVisible(true);
+            }
+        }
+
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +153,7 @@ public class ProfileActivity extends AppCompatActivity {
 
             LocalBroadcastManager broadcastManager =
                     LocalBroadcastManager.getInstance(getApplicationContext());
-            broadcastManager.registerReceiver(goalListBroadcastReceiver, filter);
+            broadcastManager.registerReceiver(profileBroadcastReceiver, filter);
         }
     }
 
@@ -126,9 +172,22 @@ public class ProfileActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(id) {
+            case R.id.action_add:
+
+                break;
+            case R.id.action_accept:
+
+                break;
+            case R.id.action_decline:
+
+                break;
+            case R.id.action_unfriend:
+
+                break;
+            case R.id.action_block:
+
+                break;
         }
 
         return super.onOptionsItemSelected(item);

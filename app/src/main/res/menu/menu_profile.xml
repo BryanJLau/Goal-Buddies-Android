@@ -2,9 +2,36 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".Social.ProfileActivity">
+
+
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+        android:id="@+id/action_add"
+        android:title="@string/profile_menu_add_friend"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_cancel"
+        android:title="@string/profile_menu_cancel_friend"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_accept"
+        android:title="@string/profile_menu_accept_friend"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_decline"
+        android:title="@string/profile_menu_decline_friend"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_unfriend"
+        android:title="@string/profile_menu_unfriend_friend"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_block"
+        android:title="@string/profile_menu_block_friend"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
 </menu>
