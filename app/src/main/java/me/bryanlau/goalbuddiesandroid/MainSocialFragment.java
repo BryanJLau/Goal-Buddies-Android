@@ -42,7 +42,6 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
      * @param position The position of the fragment
      * @return A new instance of fragment MainGoalFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static MainSocialFragment newInstance(int position) {
         MainSocialFragment fragment = new MainSocialFragment();
         Bundle args = new Bundle();
@@ -96,7 +95,6 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        // TODO implement some logic
         String username = socialList.get(position);
         Intent i = new Intent(getActivity(), ProfileActivity.class);
         i.putExtra("username", username);

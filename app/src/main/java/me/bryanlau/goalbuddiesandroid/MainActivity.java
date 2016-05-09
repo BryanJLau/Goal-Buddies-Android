@@ -111,11 +111,13 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        if(drawer != null)
+            drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        if(navigationView != null)
+            navigationView.setNavigationItemSelectedListener(this);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -125,9 +127,11 @@ public class MainActivity extends AppCompatActivity
 
         // Set up the ViewPager with the sections adapter.
         mGoalViewPager = (ViewPager) findViewById(R.id.goalViewPager);
-        mGoalViewPager.setAdapter(mGoalSectionsPagerAdapter);
+        if(mGoalViewPager != null)
+            mGoalViewPager.setAdapter(mGoalSectionsPagerAdapter);
         mSocialViewPager = (ViewPager) findViewById(R.id.socialViewPager);
-        mSocialViewPager.setAdapter(mSocialSectionsPagerAdapter);
+        if(mSocialViewPager != null)
+            mSocialViewPager.setAdapter(mSocialSectionsPagerAdapter);
         //PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pagerTabStrip);
 
         IntentFilter filter = new IntentFilter("goalbuddies.goalList");
@@ -165,7 +169,7 @@ public class MainActivity extends AppCompatActivity
         //super.onBackPressed();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             moveTaskToBack(true);
@@ -271,7 +275,8 @@ public class MainActivity extends AppCompatActivity
         mViewPager.setCurrentItem(currentPosition, true);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if(drawer != null)
+            drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 

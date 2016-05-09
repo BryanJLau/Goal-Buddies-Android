@@ -28,7 +28,6 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
     private OnFragmentInteractionListener mListener;
     private int position;
     private GoalListAdapter adapter;
-    private ArrayList<Goal> goalList;
 
     public MainGoalFragment() {
         // Required empty public constructor
@@ -41,7 +40,6 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
      * @param position The position of the fragment
      * @return A new instance of fragment MainGoalFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static MainGoalFragment newInstance(int position) {
         MainGoalFragment fragment = new MainGoalFragment();
         Bundle args = new Bundle();
@@ -68,6 +66,8 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        ArrayList<Goal> goalList;
 
         switch(position) {
             case 0:
