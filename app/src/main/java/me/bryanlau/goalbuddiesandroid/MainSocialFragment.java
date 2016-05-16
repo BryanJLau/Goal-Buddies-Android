@@ -73,7 +73,7 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
                 socialList = SocialContainer.INSTANCE.friends;
                 break;
             case 1:
-                socialList = SocialContainer.INSTANCE.pending;
+                socialList = SocialContainer.INSTANCE.incoming;
                 break;
             case 2:
                 socialList = SocialContainer.INSTANCE.blocked;

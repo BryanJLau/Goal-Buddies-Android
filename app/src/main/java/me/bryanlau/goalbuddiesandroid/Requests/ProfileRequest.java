@@ -220,7 +220,7 @@ public class ProfileRequest {
         JsonObjectRequest recurringGoalsRequest = new JsonObjectRequest(
                 Request.Method.GET,
                 "http://goalbuddies.bryanlau.me/api/goals/list?username=" +
-                    mUsername,
+                    mUsername + "&type=0",
                 null,
                 recurringGoalsSuccessListener(),
                 errorListener()
