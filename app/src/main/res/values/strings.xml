@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Goal Buddies</string>
 
+    <!-- Strings related to search dialog -->
+    <string name="dialog_username_search_title">Search</string>
+    <string name="dialog_username_search_message">Please input the desired user\'s username.</string>
+
     <!-- Strings related to nav menu -->
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_goals_current_header">Goals In Progress</string>

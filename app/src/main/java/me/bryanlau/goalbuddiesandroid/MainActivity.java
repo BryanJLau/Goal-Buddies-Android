@@ -2,6 +2,7 @@ package me.bryanlau.goalbuddiesandroid;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -21,11 +22,13 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.List;
@@ -33,6 +36,7 @@ import java.util.List;
 import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
 import me.bryanlau.goalbuddiesandroid.Requests.SocialRequest;
+import me.bryanlau.goalbuddiesandroid.Social.ProfileActivity;
 
 public class MainActivity extends AppCompatActivity
         implements MainGoalFragment.OnFragmentInteractionListener,
@@ -42,6 +46,10 @@ public class MainActivity extends AppCompatActivity
     private GoalSectionsPagerAdapter mGoalSectionsPagerAdapter;
     private SocialSectionsPagerAdapter mSocialSectionsPagerAdapter;
     private ViewPager mGoalViewPager, mSocialViewPager;
+    private FloatingActionButton addGoalFab, searchUsernameFab;
+
+    private GoalListRequest goalListRequest;
+    private SocialRequest socialRequest;
 
     private boolean currentPageGoals;
 
@@ -99,14 +107,24 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        addGoalFab = (FloatingActionButton) findViewById(R.id.addGoalFab);
+        if(addGoalFab != null)
+            addGoalFab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            });
+        searchUsernameFab = (FloatingActionButton) findViewById(R.id.searchUsernameFab);
+        if(searchUsernameFab != null)
+            searchUsernameFab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(MainActivity.this, ProfileActivity.class);
+                    startActivity(i);
+                }
+            });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -132,7 +150,10 @@ public class MainActivity extends AppCompatActivity
         mSocialViewPager = (ViewPager) findViewById(R.id.socialViewPager);
         if(mSocialViewPager != null)
             mSocialViewPager.setAdapter(mSocialSectionsPagerAdapter);
-        //PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pagerTabStrip);
+
+        goalListRequest = new GoalListRequest(getApplicationContext());
+        socialRequest = new SocialRequest(getApplicationContext());
+
 
         IntentFilter filter = new IntentFilter("goalbuddies.goalList");
         IntentFilter socialFilter = new IntentFilter("goalbuddies.social");
@@ -155,12 +176,8 @@ public class MainActivity extends AppCompatActivity
     public void onPostResume() {
         super.onPostResume();
 
-        GoalListRequest grequest = new GoalListRequest(getApplicationContext());
-        grequest.execute();
-
-        SocialRequest srequest = new SocialRequest(getApplicationContext());
-        srequest.execute();
-
+        goalListRequest.execute();
+        socialRequest.execute();
     }
 
     @Override
@@ -192,8 +209,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
-            GoalListRequest request = new GoalListRequest(getApplicationContext());
-            request.execute();
+            goalListRequest.execute();
             return true;
         }
 
@@ -217,10 +233,12 @@ public class MainActivity extends AppCompatActivity
                     mSocialViewPager.setVisibility(View.GONE);
                     mGoalViewPager.setVisibility(View.VISIBLE);
 
-                    GoalListRequest grequest = new GoalListRequest(getApplicationContext());
-                    grequest.execute();
+                    goalListRequest.execute();
                 }
                 mViewPager = mGoalViewPager;
+
+                searchUsernameFab.setVisibility(View.GONE);
+                addGoalFab.setVisibility(View.VISIBLE);
 
                 setTitle("My Goals");
                 break;
@@ -232,10 +250,12 @@ public class MainActivity extends AppCompatActivity
                     mGoalViewPager.setVisibility(View.GONE);
                     mSocialViewPager.setVisibility(View.VISIBLE);
 
-                    SocialRequest srequest = new SocialRequest(getApplicationContext());
-                    srequest.execute();
+                    socialRequest.execute();
                 }
                 mViewPager = mSocialViewPager;
+
+                searchUsernameFab.setVisibility(View.VISIBLE);
+                addGoalFab.setVisibility(View.GONE);
 
                 setTitle("Social");
                 break;

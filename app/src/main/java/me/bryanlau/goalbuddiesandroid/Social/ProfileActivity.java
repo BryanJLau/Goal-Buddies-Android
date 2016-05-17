@@ -5,8 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +19,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -24,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +60,7 @@ public class ProfileActivity extends AppCompatActivity {
                 mUser = extras.getParcelable("user");
                 mRecurring = extras.getParcelableArrayList("recurring");
                 mOnetime = extras.getParcelableArrayList("onetime");
+                setTitle(mUser.mUsername);
 
                 relation =
                         (ProfileRequest.RELATION) intent.getSerializableExtra("relation");
@@ -147,14 +152,39 @@ public class ProfileActivity extends AppCompatActivity {
             String username = extras.getString("username");
             ProfileRequest request = new ProfileRequest(getApplicationContext(), username);
             request.execute();
-            setTitle(username);
+        } else {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-            IntentFilter filter = new IntentFilter("goalbuddies.profile");
+            alert.setTitle(R.string.dialog_username_search_title);
+            alert.setMessage(R.string.dialog_username_search_message);
 
-            LocalBroadcastManager broadcastManager =
-                    LocalBroadcastManager.getInstance(getApplicationContext());
-            broadcastManager.registerReceiver(profileBroadcastReceiver, filter);
+            // Set an EditText view to get user input
+            final EditText input = new EditText(getApplicationContext());
+            input.setTextColor(Color.BLUE);
+            alert.setView(input);
+
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    String username = input.getText().toString();
+                    ProfileRequest request = new ProfileRequest(getApplicationContext(), username);
+                    request.execute();
+                }
+            });
+
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                    finish();
+                }
+            });
+            alert.show();
         }
+
+        IntentFilter filter = new IntentFilter("goalbuddies.profile");
+
+        LocalBroadcastManager broadcastManager =
+                LocalBroadcastManager.getInstance(getApplicationContext());
+        broadcastManager.registerReceiver(profileBroadcastReceiver, filter);
     }
 
 
