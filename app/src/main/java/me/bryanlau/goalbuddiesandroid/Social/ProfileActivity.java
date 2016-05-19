@@ -28,24 +28,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
 import me.bryanlau.goalbuddiesandroid.Goals.Goal;
+import me.bryanlau.goalbuddiesandroid.Goals.GoalListAdapter;
 import me.bryanlau.goalbuddiesandroid.R;
 import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
-import me.bryanlau.goalbuddiesandroid.Users.User;
 
 public class ProfileActivity extends AppCompatActivity {
     private View mProgressView;
     private View mProfileView;
     private User mUser;
-    private ArrayList<Goal> mRecurring, mOnetime;
+    static private ArrayList<Goal> mRecurring, mOnetime;
     ProfileRequest.RELATION relation;
 
     private BroadcastReceiver profileBroadcastReceiver = new BroadcastReceiver() {
@@ -259,22 +258,90 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class GoalFragment extends android.support.v4.app.ListFragment {
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+
+        private int position;
+        private GoalListAdapter adapter;
+
+        public GoalFragment() {
+        }
+
+        public static GoalFragment newInstance(int position) {
+            GoalFragment fragment = new GoalFragment();
+            Bundle args = new Bundle();
+            args.putInt("position", position);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            position = getArguments().getInt("position");
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            super.onCreateView(inflater, container, savedInstanceState);
+
+            return inflater.inflate(R.layout.fragment_main_goal, container, false);
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+
+            ArrayList<Goal> goalList;
+
+            switch(position) {
+                case 1:
+                    goalList = mRecurring != null ? mRecurring : new ArrayList<Goal>();
+                    break;
+                case 2:
+                    goalList = mOnetime != null ? mOnetime : new ArrayList<Goal>();
+                    break;
+                default:
+                    goalList = new ArrayList<>();
+            }
+
+            adapter = new GoalListAdapter(getActivity(), goalList);
+            setListAdapter(adapter);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onListItemClick(ListView l, View v, int position, long id) {
+            // TODO implement some logic
+        }
+    }
+
+    public static class ProfileFragment extends android.support.v4.app.Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        public PlaceholderFragment() {
+        public ProfileFragment() {
         }
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+        public static ProfileFragment newInstance(int sectionNumber) {
+            ProfileFragment fragment = new ProfileFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -305,7 +372,12 @@ public class ProfileActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            switch(position) {
+                case 0:
+                    return ProfileFragment.newInstance(position);
+                default:
+                    return GoalFragment.newInstance(position);
+            }
         }
 
         @Override

@@ -34,6 +34,22 @@ public enum GoalContainer {
         return new ArrayList<>(finishedOneTime.values());
     }
 
+    public void addGoal(Goal goal) {
+        if(goal.m_pending) {
+            if(goal.m_type == 0) {
+                pendingRecurring.put(goal.m_id, goal);
+            } else {
+                pendingOneTime.put(goal.m_id, goal);
+            }
+        } else {
+            if(goal.m_type == 0) {
+                finishedRecurring.put(goal.m_id, goal);
+            } else {
+                finishedOneTime.put(goal.m_id, goal);
+            }
+        }
+    }
+
     public void addGoal(JSONObject goal) {
         try {
             String id = goal.getString("_id");

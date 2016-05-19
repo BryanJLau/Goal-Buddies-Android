@@ -2,7 +2,6 @@ package me.bryanlau.goalbuddiesandroid;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -22,21 +21,26 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import me.bryanlau.goalbuddiesandroid.Goals.Goal;
+import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
+import me.bryanlau.goalbuddiesandroid.Goals.MainGoalFragment;
 import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
+import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
-import me.bryanlau.goalbuddiesandroid.Requests.SocialRequest;
+import me.bryanlau.goalbuddiesandroid.Social.MainSocialFragment;
 import me.bryanlau.goalbuddiesandroid.Social.ProfileActivity;
+import me.bryanlau.goalbuddiesandroid.Social.SocialContainer;
+import me.bryanlau.goalbuddiesandroid.Social.User;
 
 public class MainActivity extends AppCompatActivity
         implements MainGoalFragment.OnFragmentInteractionListener,
@@ -48,8 +52,11 @@ public class MainActivity extends AppCompatActivity
     private ViewPager mGoalViewPager, mSocialViewPager;
     private FloatingActionButton addGoalFab, searchUsernameFab;
 
-    private GoalListRequest goalListRequest;
-    private SocialRequest socialRequest;
+    private GoalListRequest pendingRecurringRequest;
+    private GoalListRequest pendingOneTimeRequest;
+    private GoalListRequest finishedRecurringRequest;
+    private GoalListRequest finishedOneTimeRequest;
+    private ProfileRequest profileRequest;
 
     private boolean currentPageGoals;
 
@@ -85,9 +92,53 @@ public class MainActivity extends AppCompatActivity
 
             int statusCode = extras.getInt("statusCode");
             if(RequestUtils.isOk(statusCode)) {
+                ArrayList<Goal> goalArrayList = extras.getParcelableArrayList("goalList");
+                if(goalArrayList != null) {
+                    for (int i = 0; i < goalArrayList.size(); i++) {
+                        Goal goal = goalArrayList.get(i);
+                        GoalContainer.INSTANCE.addGoal(goal);
+                    }
+                }
+
                 refreshFragments();
-                Snackbar.make(findViewById(R.id.main_content), "Refreshed", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                View mainContent = findViewById(R.id.main_content);
+                if(mainContent != null) {
+                    Snackbar.make(mainContent, "Refreshed", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            } else if(RequestUtils.isBad(statusCode)) {
+                // Unauthorized, expired token most likely
+                // For simplicity, just redirect to login screen
+                // in case password was changed
+                Toast.makeText(getApplicationContext(),
+                        "Your login has expired, please login again!",
+                        Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+    };
+
+    private BroadcastReceiver profileBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+
+            int statusCode = extras.getInt("statusCode");
+            if(RequestUtils.isOk(statusCode)) {
+                User user = extras.getParcelable("user");
+
+                if(user != null) {
+                    SocialContainer.INSTANCE.friends = user.mFriends;
+                    SocialContainer.INSTANCE.incoming = user.mIncoming;
+                    SocialContainer.INSTANCE.blocked = user.mBlocked;
+                }
+
+                refreshFragments();
+                View mainContent = findViewById(R.id.main_content);
+                if(mainContent != null) {
+                    Snackbar.make(mainContent, "Refreshed", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
             } else if(RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
@@ -151,16 +202,30 @@ public class MainActivity extends AppCompatActivity
         if(mSocialViewPager != null)
             mSocialViewPager.setAdapter(mSocialSectionsPagerAdapter);
 
-        goalListRequest = new GoalListRequest(getApplicationContext());
-        socialRequest = new SocialRequest(getApplicationContext());
+        pendingRecurringRequest = new GoalListRequest.Builder(getApplicationContext())
+                .pending(true)
+                .type(0)
+                .build();
+        pendingOneTimeRequest = new GoalListRequest.Builder(getApplicationContext())
+                .pending(true)
+                .type(1)
+                .build();
+        finishedRecurringRequest = new GoalListRequest.Builder(getApplicationContext())
+                .pending(false)
+                .type(0)
+                .build();
+        finishedOneTimeRequest = new GoalListRequest.Builder(getApplicationContext())
+                .pending(false)
+                .type(1)
+                .build();
+        profileRequest = new ProfileRequest(getApplicationContext());
 
-
-        IntentFilter filter = new IntentFilter("goalbuddies.goalList");
-        IntentFilter socialFilter = new IntentFilter("goalbuddies.social");
+        IntentFilter goalFilter = new IntentFilter("goalbuddies.goalList");
+        IntentFilter profileFilter = new IntentFilter("goalbuddies.profile");
 
         broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        broadcastManager.registerReceiver(goalListBroadcastReceiver, filter);
-        broadcastManager.registerReceiver(goalListBroadcastReceiver, socialFilter);
+        broadcastManager.registerReceiver(goalListBroadcastReceiver, goalFilter);
+        broadcastManager.registerReceiver(profileBroadcastReceiver, profileFilter);
 
         currentPageGoals = true;
 
@@ -176,8 +241,11 @@ public class MainActivity extends AppCompatActivity
     public void onPostResume() {
         super.onPostResume();
 
-        goalListRequest.execute();
-        socialRequest.execute();
+        pendingRecurringRequest.execute();
+        pendingOneTimeRequest.execute();
+        finishedRecurringRequest.execute();
+        finishedOneTimeRequest.execute();
+        profileRequest.execute();
     }
 
     @Override
@@ -209,7 +277,10 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
-            goalListRequest.execute();
+            pendingRecurringRequest.execute();
+            pendingOneTimeRequest.execute();
+            finishedRecurringRequest.execute();
+            finishedOneTimeRequest.execute();
             return true;
         }
 
@@ -233,7 +304,10 @@ public class MainActivity extends AppCompatActivity
                     mSocialViewPager.setVisibility(View.GONE);
                     mGoalViewPager.setVisibility(View.VISIBLE);
 
-                    goalListRequest.execute();
+                    pendingRecurringRequest.execute();
+                    pendingOneTimeRequest.execute();
+                    finishedRecurringRequest.execute();
+                    finishedOneTimeRequest.execute();
                 }
                 mViewPager = mGoalViewPager;
 
@@ -250,7 +324,7 @@ public class MainActivity extends AppCompatActivity
                     mGoalViewPager.setVisibility(View.GONE);
                     mSocialViewPager.setVisibility(View.VISIBLE);
 
-                    socialRequest.execute();
+                    profileRequest.execute();
                 }
                 mViewPager = mSocialViewPager;
 

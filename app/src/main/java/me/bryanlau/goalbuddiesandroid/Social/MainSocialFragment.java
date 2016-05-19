@@ -1,4 +1,4 @@
-package me.bryanlau.goalbuddiesandroid;
+package me.bryanlau.goalbuddiesandroid.Social;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,8 +13,8 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-import me.bryanlau.goalbuddiesandroid.Social.ProfileActivity;
-import me.bryanlau.goalbuddiesandroid.Social.SocialContainer;
+import me.bryanlau.goalbuddiesandroid.Goals.MainGoalFragment;
+import me.bryanlau.goalbuddiesandroid.R;
 
 
 /**

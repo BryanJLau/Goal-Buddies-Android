@@ -1,4 +1,4 @@
-package me.bryanlau.goalbuddiesandroid;
+package me.bryanlau.goalbuddiesandroid.Goals;
 
 import android.content.Context;
 import android.net.Uri;
@@ -11,9 +11,7 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-import me.bryanlau.goalbuddiesandroid.Goals.Goal;
-import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
-import me.bryanlau.goalbuddiesandroid.Goals.GoalListAdapter;
+import me.bryanlau.goalbuddiesandroid.R;
 
 
 /**
