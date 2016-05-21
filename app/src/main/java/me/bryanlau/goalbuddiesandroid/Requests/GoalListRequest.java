@@ -29,7 +29,7 @@ public class GoalListRequest {
     private SharedPreferences preferences;
     private RequestQueue queue;
     private LocalBroadcastManager broadcastManager;
-    private Intent goalListIntent = new Intent("goalbuddies.goalList");
+    private Intent goalListIntent;
 
     // Optional Parameters
     private final String username;
@@ -148,13 +148,14 @@ public class GoalListRequest {
         limit       = builder.limit;
         offset      = builder.offset;
         version     = builder.version;
+
+        goalListIntent = new Intent(RequestUtils.goalListAction);
     }
 
     public void execute() {
         // Build the URL based on the parameters given
-        String url = "http://goalbuddies.bryanlau.me/api/goals/list?" +
-                "username=" + username +
-                "&pending=" + Boolean.toString(pending) +
+        String url = "http://goalbuddies.bryanlau.me/api/goals/list/" + username +
+                "?pending=" + Boolean.toString(pending) +
                 "&type=" + Integer.toString(type) +
                 "&limit=" + Integer.toString(limit) +
                 "&offset=" + Integer.toString(offset) +

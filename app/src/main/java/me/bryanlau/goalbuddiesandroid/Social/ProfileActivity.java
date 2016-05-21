@@ -3,6 +3,7 @@ package me.bryanlau.goalbuddiesandroid.Social;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,12 +12,14 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -33,10 +36,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import me.bryanlau.goalbuddiesandroid.Goals.Goal;
 import me.bryanlau.goalbuddiesandroid.Goals.GoalListAdapter;
+import me.bryanlau.goalbuddiesandroid.MainActivity;
 import me.bryanlau.goalbuddiesandroid.R;
+import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
 
@@ -44,8 +50,11 @@ public class ProfileActivity extends AppCompatActivity {
     private View mProgressView;
     private View mProfileView;
     private User mUser;
-    static private ArrayList<Goal> mRecurring, mOnetime;
+    private String username;
+    static private ArrayList<Goal> mRecurring;
+    static private ArrayList<Goal> mOnetime;
     ProfileRequest.RELATION relation;
+    private LocalBroadcastManager broadcastManager;
 
     private BroadcastReceiver profileBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -57,14 +66,87 @@ public class ProfileActivity extends AppCompatActivity {
                 showProgress(false);
 
                 mUser = extras.getParcelable("user");
-                mRecurring = extras.getParcelableArrayList("recurring");
-                mOnetime = extras.getParcelableArrayList("onetime");
+                if(mUser == null) {
+                    finish();
+                }
+
                 setTitle(mUser.mUsername);
 
                 relation =
                         (ProfileRequest.RELATION) intent.getSerializableExtra("relation");
                 invalidateOptionsMenu();
 
+                if(relation == ProfileRequest.RELATION.FRIENDS) {
+                    new GoalListRequest.Builder(getApplicationContext())
+                            .pending(true)
+                            .type(0)
+                            .username(mUser.mUsername)
+                            .build()
+                            .execute();
+                    new GoalListRequest.Builder(getApplicationContext())
+                            .pending(true)
+                            .type(1)
+                            .username(mUser.mUsername)
+                            .build()
+                            .execute();
+                }
+            } else if(RequestUtils.isBad(statusCode)) {
+                // Unauthorized, expired token most likely
+                // For simplicity, just redirect to login screen
+                // in case password was changed
+                Toast.makeText(getApplicationContext(),
+                        "Something went wrong, please try again later!",
+                        Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+    };
+
+    private BroadcastReceiver goalListBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+
+            int statusCode = extras.getInt("statusCode");
+            if(RequestUtils.isOk(statusCode)) {
+                ArrayList<Goal> goalArrayList = extras.getParcelableArrayList("goalList");
+                if(goalArrayList != null) {
+                    for (int i = 0; i < goalArrayList.size(); i++) {
+                        Goal goal = goalArrayList.get(i);
+                        if(goal.m_type == 0)
+                            mRecurring.add(goal);
+                        else
+                            mOnetime.add(goal);
+                    }
+                }
+
+                try {
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    List<Fragment> fragments = fragmentManager.getFragments();
+
+                    // So we can't actually call the adapter to refresh
+                    // because the content view is *never* created.
+                    // We'll just take out the fragment and put it back
+                    // to "simulate" a refresh
+                    for (Fragment f : fragments) {
+                        if (f != null) {
+                            transaction.detach(f).attach(f);
+                        }
+                    }
+                    transaction.commit();
+                } catch (IllegalStateException e) {
+                    // Activity was destroyed, but we're still good
+                    // Should not happen now that we put the refresh code in
+                    // onPostResume, but we'll keep it here anyway
+                }
+
+                View mainContent = findViewById(R.id.main_content);
+                if(mainContent != null) {
+                    Snackbar.make(mainContent, "Refreshed", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
             } else if(RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
@@ -133,24 +215,17 @@ public class ProfileActivity extends AppCompatActivity {
         if(tabLayout != null)
             tabLayout.setupWithViewPager(mViewPager);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        if(fab != null)
-            fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                }
-            });
-
         mProfileView = findViewById(R.id.profile_container);
         mProgressView = findViewById(R.id.profile_progress);
 
+        mRecurring = new ArrayList<>();
+        mOnetime = new ArrayList<>();
+
+        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            String username = extras.getString("username");
-            ProfileRequest request = new ProfileRequest(getApplicationContext(), username);
-            request.execute();
+            username = extras.getString("username");
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -164,9 +239,7 @@ public class ProfileActivity extends AppCompatActivity {
 
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    String username = input.getText().toString();
-                    ProfileRequest request = new ProfileRequest(getApplicationContext(), username);
-                    request.execute();
+                    username = input.getText().toString();
                 }
             });
 
@@ -179,11 +252,27 @@ public class ProfileActivity extends AppCompatActivity {
             alert.show();
         }
 
-        IntentFilter filter = new IntentFilter("goalbuddies.profile");
+        new ProfileRequest(getApplicationContext(), username).execute();
+    }
 
-        LocalBroadcastManager broadcastManager =
-                LocalBroadcastManager.getInstance(getApplicationContext());
-        broadcastManager.registerReceiver(profileBroadcastReceiver, filter);
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        broadcastManager.registerReceiver(
+                goalListBroadcastReceiver,
+                RequestUtils.goalListFilter);
+        broadcastManager.registerReceiver(
+                profileBroadcastReceiver,
+                RequestUtils.profileFilter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        broadcastManager.unregisterReceiver(goalListBroadcastReceiver);
+        broadcastManager.unregisterReceiver(profileBroadcastReceiver);
     }
 
 

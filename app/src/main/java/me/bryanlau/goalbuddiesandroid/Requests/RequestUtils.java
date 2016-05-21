@@ -1,6 +1,7 @@
 package me.bryanlau.goalbuddiesandroid.Requests;
 
 import android.content.Context;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.Nullable;
@@ -14,6 +15,11 @@ import java.net.HttpURLConnection;
 
 public final class RequestUtils {
     private RequestUtils() {}    // Purely static class
+
+    public static String goalListAction = "goalbuddies.goalList";
+    public static String profileAction = "goalbuddies.profile";
+    public static IntentFilter goalListFilter = new IntentFilter(goalListAction);
+    public static IntentFilter profileFilter = new IntentFilter(profileAction);
 
     public static boolean isOk(int statusCode) {
         return (statusCode >= 200 && statusCode < 300);

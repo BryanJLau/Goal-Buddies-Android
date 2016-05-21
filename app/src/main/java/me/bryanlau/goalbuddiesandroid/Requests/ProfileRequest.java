@@ -28,7 +28,7 @@ public class ProfileRequest {
     private SharedPreferences preferences;
     private RequestQueue queue;
     private LocalBroadcastManager broadcastManager;
-    private Intent profileIntent = new Intent("goalbuddies.profile");
+    private Intent profileIntent;
 
     public enum RELATION {
         NONE, SELF, FRIENDS, INCOMING, OUTGOING
@@ -116,6 +116,8 @@ public class ProfileRequest {
         broadcastManager = LocalBroadcastManager.getInstance(context);
 
         this.username = username;
+
+        profileIntent = new Intent(RequestUtils.profileAction);
     }
 
     public ProfileRequest(Context context) {
@@ -124,11 +126,12 @@ public class ProfileRequest {
         broadcastManager = LocalBroadcastManager.getInstance(context);
 
         this.username = preferences.getString("username", "");
+
+        profileIntent = new Intent(RequestUtils.profileAction);
     }
 
     public void execute() {
-        String url = "http://goalbuddies.bryanlau.me/api/users/search/" +
-            "?username=" + username;
+        String url = "http://goalbuddies.bryanlau.me/api/users/search/" + username;
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,

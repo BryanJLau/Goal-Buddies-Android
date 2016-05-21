@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity
     private GoalListRequest finishedOneTimeRequest;
     private ProfileRequest profileRequest;
 
+    private String username;
+
     private boolean currentPageGoals;
 
     private void refreshFragments() {
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private LocalBroadcastManager broadcastManager;
+
     private BroadcastReceiver goalListBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -220,12 +223,7 @@ public class MainActivity extends AppCompatActivity
                 .build();
         profileRequest = new ProfileRequest(getApplicationContext());
 
-        IntentFilter goalFilter = new IntentFilter("goalbuddies.goalList");
-        IntentFilter profileFilter = new IntentFilter("goalbuddies.profile");
-
         broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        broadcastManager.registerReceiver(goalListBroadcastReceiver, goalFilter);
-        broadcastManager.registerReceiver(profileBroadcastReceiver, profileFilter);
 
         currentPageGoals = true;
 
@@ -235,6 +233,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+
+        broadcastManager.registerReceiver(
+                goalListBroadcastReceiver,
+                RequestUtils.goalListFilter);
+        broadcastManager.registerReceiver(
+                profileBroadcastReceiver,
+                RequestUtils.profileFilter);
     }
 
     @Override
@@ -246,6 +251,14 @@ public class MainActivity extends AppCompatActivity
         finishedRecurringRequest.execute();
         finishedOneTimeRequest.execute();
         profileRequest.execute();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        broadcastManager.unregisterReceiver(goalListBroadcastReceiver);
+        broadcastManager.unregisterReceiver(profileBroadcastReceiver);
     }
 
     @Override
@@ -281,6 +294,7 @@ public class MainActivity extends AppCompatActivity
             pendingOneTimeRequest.execute();
             finishedRecurringRequest.execute();
             finishedOneTimeRequest.execute();
+            profileRequest.execute();
             return true;
         }
 
@@ -303,11 +317,6 @@ public class MainActivity extends AppCompatActivity
                     currentPageGoals = true;
                     mSocialViewPager.setVisibility(View.GONE);
                     mGoalViewPager.setVisibility(View.VISIBLE);
-
-                    pendingRecurringRequest.execute();
-                    pendingOneTimeRequest.execute();
-                    finishedRecurringRequest.execute();
-                    finishedOneTimeRequest.execute();
                 }
                 mViewPager = mGoalViewPager;
 
@@ -323,8 +332,6 @@ public class MainActivity extends AppCompatActivity
                     currentPageGoals = false;
                     mGoalViewPager.setVisibility(View.GONE);
                     mSocialViewPager.setVisibility(View.VISIBLE);
-
-                    profileRequest.execute();
                 }
                 mViewPager = mSocialViewPager;
 
