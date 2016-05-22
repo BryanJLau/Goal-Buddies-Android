@@ -35,6 +35,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,12 +50,36 @@ import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
 public class ProfileActivity extends AppCompatActivity {
     private View mProgressView;
     private View mProfileView;
-    private User mUser;
+    private static User mUser;
     private String username;
-    static private ArrayList<Goal> mRecurring;
-    static private ArrayList<Goal> mOnetime;
-    ProfileRequest.RELATION relation;
+    private static ArrayList<Goal> mRecurring;
+    private static ArrayList<Goal> mOnetime;
+    private static ProfileRequest.RELATION relation;
     private LocalBroadcastManager broadcastManager;
+
+    private void refreshFragments() {
+        try {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            List<Fragment> fragments = fragmentManager.getFragments();
+
+            // So we can't actually call the adapter to refresh
+            // because the content view is *never* created.
+            // We'll just take out the fragment and put it back
+            // to "simulate" a refresh
+            for (Fragment f : fragments) {
+                if (f != null) {
+                    transaction.detach(f).attach(f);
+                }
+            }
+            transaction.commit();
+        } catch (IllegalStateException e) {
+            // Activity was destroyed, but we're still good
+            // Should not happen now that we put the refresh code in
+            // onPostResume, but we'll keep it here anyway
+        }
+    }
 
     private BroadcastReceiver profileBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -90,13 +115,26 @@ public class ProfileActivity extends AppCompatActivity {
                             .build()
                             .execute();
                 }
+
+                refreshFragments();
             } else if(RequestUtils.isBad(statusCode)) {
-                // Unauthorized, expired token most likely
-                // For simplicity, just redirect to login screen
-                // in case password was changed
-                Toast.makeText(getApplicationContext(),
-                        "Something went wrong, please try again later!",
-                        Toast.LENGTH_LONG).show();
+                switch(statusCode) {
+                    case HttpURLConnection.HTTP_NOT_FOUND:
+                        Toast.makeText(getApplicationContext(),
+                                "User not found.",
+                                Toast.LENGTH_LONG).show();
+                        break;
+                    case HttpURLConnection.HTTP_UNAUTHORIZED:
+                        // Login expired. The app will try logging in
+                        // again when fetching your goal list, so let
+                        // MainActivity go back to LoginActivity
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(),
+                                "Something went wrong, please try again later!",
+                                Toast.LENGTH_LONG).show();
+                }
+
                 finish();
             }
         }
@@ -120,39 +158,13 @@ public class ProfileActivity extends AppCompatActivity {
                     }
                 }
 
-                try {
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-
-                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                    List<Fragment> fragments = fragmentManager.getFragments();
-
-                    // So we can't actually call the adapter to refresh
-                    // because the content view is *never* created.
-                    // We'll just take out the fragment and put it back
-                    // to "simulate" a refresh
-                    for (Fragment f : fragments) {
-                        if (f != null) {
-                            transaction.detach(f).attach(f);
-                        }
-                    }
-                    transaction.commit();
-                } catch (IllegalStateException e) {
-                    // Activity was destroyed, but we're still good
-                    // Should not happen now that we put the refresh code in
-                    // onPostResume, but we'll keep it here anyway
-                }
-
-                View mainContent = findViewById(R.id.main_content);
-                if(mainContent != null) {
-                    Snackbar.make(mainContent, "Refreshed", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
+                refreshFragments();
             } else if(RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
                 // in case password was changed
                 Toast.makeText(getApplicationContext(),
-                        "Your login has expired, please login again!",
+                        "Something went wrong, please try again later!",
                         Toast.LENGTH_LONG).show();
                 finish();
             }
@@ -215,6 +227,9 @@ public class ProfileActivity extends AppCompatActivity {
         if(tabLayout != null)
             tabLayout.setupWithViewPager(mViewPager);
 
+        relation = ProfileRequest.RELATION.NONE;
+        mUser = null;
+
         mProfileView = findViewById(R.id.profile_container);
         mProgressView = findViewById(R.id.profile_progress);
 
@@ -226,6 +241,7 @@ public class ProfileActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             username = extras.getString("username");
+            new ProfileRequest(getApplicationContext(), username).execute();
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -240,6 +256,7 @@ public class ProfileActivity extends AppCompatActivity {
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     username = input.getText().toString();
+                    new ProfileRequest(getApplicationContext(), username).execute();
                 }
             });
 
@@ -251,8 +268,6 @@ public class ProfileActivity extends AppCompatActivity {
             });
             alert.show();
         }
-
-        new ProfileRequest(getApplicationContext(), username).execute();
     }
 
     @Override
@@ -379,7 +394,7 @@ public class ProfileActivity extends AppCompatActivity {
                                  Bundle savedInstanceState) {
             super.onCreateView(inflater, container, savedInstanceState);
 
-            return inflater.inflate(R.layout.fragment_main_goal, container, false);
+            return inflater.inflate(R.layout.fragment_profile_goal, container, false);
         }
 
         @Override
@@ -429,20 +444,51 @@ public class ProfileActivity extends AppCompatActivity {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static ProfileFragment newInstance(int sectionNumber) {
-            ProfileFragment fragment = new ProfileFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
+        public static ProfileFragment newInstance() {
+            return new ProfileFragment();
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+
+            if(relation == ProfileRequest.RELATION.FRIENDS) {
+                View nameLayout = rootView.findViewById(R.id.profile_section_name);
+                if (nameLayout != null)
+                    nameLayout.setVisibility(View.VISIBLE);
+
+                TextView nameView =
+                        (TextView) rootView.findViewById(R.id.profile_section_body_name);
+                if (nameView != null) {
+                    String fullName = mUser.mFirstName + " " + mUser.mLastName;
+                    nameView.setText(fullName);
+                }
+            }
+
+            if(mUser != null) {
+                TextView usernameView =
+                        (TextView) rootView.findViewById(R.id.profile_section_body_username);
+                if (usernameView != null) {
+                    usernameView.setText(mUser.mUsername);
+                }
+                TextView cityView =
+                        (TextView) rootView.findViewById(R.id.profile_section_body_city);
+                if (cityView != null) {
+                    cityView.setText(mUser.mCity);
+                }
+                TextView goalsCompletedView =
+                        (TextView) rootView.findViewById(R.id.profile_section_body_goals_completed);
+                if (goalsCompletedView != null) {
+                    goalsCompletedView.setText(Integer.toString(mUser.mGoalsCompleted));
+                }
+                TextView timesMotivatedView =
+                        (TextView) rootView.findViewById(R.id.profile_section_body_times_motivated);
+                if (timesMotivatedView != null) {
+                    timesMotivatedView.setText(Integer.toString(mUser.mTimesMotivated));
+                }
+            }
+
             return rootView;
         }
     }
@@ -463,7 +509,7 @@ public class ProfileActivity extends AppCompatActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
             switch(position) {
                 case 0:
-                    return ProfileFragment.newInstance(position);
+                    return ProfileFragment.newInstance();
                 default:
                     return GoalFragment.newInstance(position);
             }

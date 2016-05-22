@@ -11,17 +11,19 @@ public class User implements Parcelable {
     public String mLastName;
     public String mCity;
     public int mGoalsCompleted;
+    public int mTimesMotivated;
     public ArrayList<String> mFriends;
     public ArrayList<String> mIncoming;
     public ArrayList<String> mBlocked;
 
     public User(String username, String firstName, String lastName,
-                String city, int goalsCompleted) {
+                String city, int goalsCompleted, int timesMotivated) {
         mUsername = username;
         mFirstName = firstName;
         mLastName = lastName;
         mCity = city;
         mGoalsCompleted = goalsCompleted;
+        mTimesMotivated = timesMotivated;
         mFriends = new ArrayList<>();
         mIncoming = new ArrayList<>();
         mBlocked = new ArrayList<>();
@@ -33,6 +35,7 @@ public class User implements Parcelable {
         mLastName = in.readString();
         mCity = in.readString();
         mGoalsCompleted = in.readInt();
+        mTimesMotivated = in.readInt();
         if (in.readByte() == 0x01) {
             mFriends = new ArrayList<String>();
             in.readList(mFriends, String.class.getClassLoader());
@@ -65,6 +68,7 @@ public class User implements Parcelable {
         dest.writeString(mLastName);
         dest.writeString(mCity);
         dest.writeInt(mGoalsCompleted);
+        dest.writeInt(mTimesMotivated);
         if (mFriends == null) {
             dest.writeByte((byte) (0x00));
         } else {

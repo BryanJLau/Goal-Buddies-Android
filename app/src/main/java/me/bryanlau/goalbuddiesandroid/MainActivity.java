@@ -58,8 +58,6 @@ public class MainActivity extends AppCompatActivity
     private GoalListRequest finishedOneTimeRequest;
     private ProfileRequest profileRequest;
 
-    private String username;
-
     private boolean currentPageGoals;
 
     private void refreshFragments() {

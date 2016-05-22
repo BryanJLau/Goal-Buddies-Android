@@ -49,7 +49,8 @@ public class ProfileRequest {
                             jsonUser.getString("firstName"),
                             jsonUser.getString("lastName"),
                             jsonUser.getString("city"),
-                            jsonUser.getInt("goalsCompleted")
+                            jsonUser.getInt("goalsCompleted"),
+                            jsonUser.getInt("timesMotivated")
                     );
 
                     // These arrays only have 0 or 1 item
