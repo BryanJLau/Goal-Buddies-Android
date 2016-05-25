@@ -20,10 +20,10 @@
     <string name="nav_technical_logout">Logout</string>
 
     <!-- Strings related to profile -->
-    <string name="profile_menu_add_friend">Request</string>
-    <string name="profile_menu_cancel_friend">Request</string>
+    <string name="profile_menu_request_friend">Request</string>
+    <string name="profile_menu_cancel_friend">Cancel</string>
     <string name="profile_menu_accept_friend">Accept</string>
-    <string name="profile_menu_decline_friend">Decline</string>
+    <string name="profile_menu_reject_friend">Reject</string>
     <string name="profile_menu_unfriend_friend">Unfriend</string>
     <string name="profile_menu_block_friend">Block</string>
     <string name="profile_empty_goal_list">No pending goals in this category</string>

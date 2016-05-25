@@ -45,6 +45,7 @@ import me.bryanlau.goalbuddiesandroid.MainActivity;
 import me.bryanlau.goalbuddiesandroid.R;
 import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
+import me.bryanlau.goalbuddiesandroid.Requests.RelationRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -171,6 +172,26 @@ public class ProfileActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver relationBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+
+            int statusCode = extras.getInt("statusCode");
+            if(RequestUtils.isBad(statusCode)) {
+                // Unauthorized, expired token most likely
+                // For simplicity, just redirect to login screen
+                // in case password was changed
+                Toast.makeText(getApplicationContext(),
+                        extras.getString("error"),
+                        Toast.LENGTH_LONG).show();
+            }
+
+            // Need to refresh the menu and such anyway regardless
+            new ProfileRequest(getApplicationContext(), username).execute();
+        }
+    };
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
@@ -184,13 +205,13 @@ public class ProfileActivity extends AppCompatActivity {
                     break;
                 case INCOMING:
                     menuButtons[0] = menu.findItem(R.id.action_accept);
-                    menuButtons[1] = menu.findItem(R.id.action_decline);
+                    menuButtons[1] = menu.findItem(R.id.action_reject);
                     break;
                 case OUTGOING:
                     menuButtons[0] = menu.findItem(R.id.action_cancel);
                     break;
                 case NONE:
-                    menuButtons[0] = menu.findItem(R.id.action_add);
+                    menuButtons[0] = menu.findItem(R.id.action_request);
                     menuButtons[1] = menu.findItem(R.id.action_block);
                     break;
             }
@@ -280,6 +301,9 @@ public class ProfileActivity extends AppCompatActivity {
         broadcastManager.registerReceiver(
                 profileBroadcastReceiver,
                 RequestUtils.profileFilter);
+        broadcastManager.registerReceiver(
+                relationBroadcastReceiver,
+                RequestUtils.relationFilter);
     }
 
     @Override
@@ -288,6 +312,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         broadcastManager.unregisterReceiver(goalListBroadcastReceiver);
         broadcastManager.unregisterReceiver(profileBroadcastReceiver);
+        broadcastManager.unregisterReceiver(relationBroadcastReceiver);
     }
 
 
@@ -305,23 +330,31 @@ public class ProfileActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        switch(id) {
-            case R.id.action_add:
+        RelationRequest request = null;
 
+        switch(id) {
+            case R.id.action_request:
+                request = new RelationRequest(this, username, RelationRequest.REQUEST_TYPE.REQUEST);
                 break;
             case R.id.action_accept:
-
+                request = new RelationRequest(this, username, RelationRequest.REQUEST_TYPE.ACCEPT);
                 break;
-            case R.id.action_decline:
-
+            case R.id.action_reject:
+                request = new RelationRequest(this, username, RelationRequest.REQUEST_TYPE.REJECT);
+                break;
+            case R.id.action_cancel:
+                request = new RelationRequest(this, username, RelationRequest.REQUEST_TYPE.CANCEL);
                 break;
             case R.id.action_unfriend:
-
+                request = new RelationRequest(this, username, RelationRequest.REQUEST_TYPE.UNFRIEND);
                 break;
             case R.id.action_block:
-
+                request = new RelationRequest(this, username, RelationRequest.REQUEST_TYPE.BLOCK);
                 break;
         }
+
+        if(request != null)
+            request.execute();
 
         return super.onOptionsItemSelected(item);
     }

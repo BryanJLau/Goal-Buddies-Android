@@ -5,8 +5,8 @@
 
 
     <item
-        android:id="@+id/action_add"
-        android:title="@string/profile_menu_add_friend"
+        android:id="@+id/action_request"
+        android:title="@string/profile_menu_request_friend"
         android:visible="false"
         app:showAsAction="ifRoom" />
     <item
@@ -20,8 +20,8 @@
         android:visible="false"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_decline"
-        android:title="@string/profile_menu_decline_friend"
+        android:id="@+id/action_reject"
+        android:title="@string/profile_menu_reject_friend"
         android:visible="false"
         app:showAsAction="ifRoom" />
     <item
