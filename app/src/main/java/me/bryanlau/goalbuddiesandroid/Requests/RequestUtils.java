@@ -6,7 +6,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.Nullable;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +32,14 @@ public final class RequestUtils {
 
     public static boolean isBad(int statusCode) {
         return (statusCode >= 400 && statusCode < 500);
+    }
+
+    public static Request setTimeout(Request request) {
+        return request.setRetryPolicy(
+                new DefaultRetryPolicy(20000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+        );
     }
 
     public static boolean isNetworkAvailable(Context context) {

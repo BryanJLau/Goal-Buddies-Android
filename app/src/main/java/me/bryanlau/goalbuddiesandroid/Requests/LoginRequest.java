@@ -87,13 +87,16 @@ public class LoginRequest {
             postParameters.put("username", username);
             postParameters.put("password", password);
 
-            JsonObjectRequest loginRequest = new JsonObjectRequest(
-                    Request.Method.POST,
-                    "http://goalbuddies.bryanlau.me/api/users/login",
-                    postParameters,
-                    loginSuccessListener(),
-                    loginErrorListener()
-            );
+            JsonObjectRequest loginRequest = (JsonObjectRequest)
+                    RequestUtils.setTimeout(
+                            new JsonObjectRequest(
+                                Request.Method.POST,
+                                "http://goalbuddies.bryanlau.me/api/users/login",
+                                postParameters,
+                                loginSuccessListener(),
+                                loginErrorListener()
+                            )
+                    );
 
             queue.add(loginRequest);
         } catch (JSONException e) {

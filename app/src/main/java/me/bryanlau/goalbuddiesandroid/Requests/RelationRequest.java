@@ -108,18 +108,16 @@ public class RelationRequest {
         try {
             postParameters.put("token", preferences.getString("token", ""));
 
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    postParameters,
-                    successListener(),
-                    errorListener()
-            );
-            request.setRetryPolicy(
-                    new DefaultRetryPolicy(20000,
-                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
-            );
+            JsonObjectRequest request = (JsonObjectRequest)
+                    RequestUtils.setTimeout(
+                            new JsonObjectRequest(
+                                Request.Method.POST,
+                                url,
+                                postParameters,
+                                successListener(),
+                                errorListener()
+                        )
+                    );
 
             queue.add(request);
         } catch (JSONException e) {

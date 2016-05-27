@@ -161,20 +161,23 @@ public class GoalListRequest {
                 "&offset=" + Integer.toString(offset) +
                 "&version=" + Integer.toString(version);
 
-        JsonObjectRequest goalListRequest = new JsonObjectRequest(
-                Request.Method.GET,
-                url,
-                null,
-                goalListSuccessListener(),
-                goalListErrorListener()
-        ) {
-            public Map<String, String> getHeaders() throws
-                    com.android.volley.AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("x-access-token", preferences.getString("token", ""));
-                return params;
-            }
-        };
+        JsonObjectRequest goalListRequest = (JsonObjectRequest)
+                RequestUtils.setTimeout(
+                        new JsonObjectRequest(
+                                Request.Method.GET,
+                                url,
+                                null,
+                                goalListSuccessListener(),
+                                goalListErrorListener()
+                        ) {
+                            public Map<String, String> getHeaders() throws
+                                    com.android.volley.AuthFailureError {
+                                Map<String, String> params = new HashMap<>();
+                                params.put("x-access-token", preferences.getString("token", ""));
+                                return params;
+                            }
+                        }
+                );
 
         queue.add(goalListRequest);
     }

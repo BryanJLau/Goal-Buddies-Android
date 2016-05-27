@@ -134,20 +134,23 @@ public class ProfileRequest {
     public void execute() {
         String url = "http://goalbuddies.bryanlau.me/api/users/search/" + username;
 
-        JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.GET,
-                url,
-                null,
-                successListener(),
-                errorListener()
-        ) {
-            public Map<String, String> getHeaders() throws
-                    com.android.volley.AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("x-access-token", preferences.getString("token", ""));
-                return params;
-            }
-        };
+        JsonObjectRequest request = (JsonObjectRequest)
+                RequestUtils.setTimeout(
+                        new JsonObjectRequest(
+                                Request.Method.GET,
+                                url,
+                                null,
+                                successListener(),
+                                errorListener()
+                        ) {
+                            public Map<String, String> getHeaders() throws
+                                    com.android.volley.AuthFailureError {
+                                Map<String, String> params = new HashMap<>();
+                                params.put("x-access-token", preferences.getString("token", ""));
+                                return params;
+                            }
+                        }
+                );
 
         queue.add(request);
     }
