@@ -36,6 +36,7 @@ import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
 import me.bryanlau.goalbuddiesandroid.Goals.MainGoalFragment;
 import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
+import me.bryanlau.goalbuddiesandroid.Requests.RelationRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
 import me.bryanlau.goalbuddiesandroid.Social.MainSocialFragment;
 import me.bryanlau.goalbuddiesandroid.Social.ProfileActivity;
@@ -152,6 +153,23 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    private BroadcastReceiver relationBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+
+            int statusCode = extras.getInt("statusCode");
+            if(RequestUtils.isOk(statusCode)) {
+                profileRequest.execute();
+            } else {
+                // Unblock failed
+                Toast.makeText(getApplicationContext(),
+                        extras.getString("error"),
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -238,6 +256,9 @@ public class MainActivity extends AppCompatActivity
         broadcastManager.registerReceiver(
                 profileBroadcastReceiver,
                 RequestUtils.profileFilter);
+        broadcastManager.registerReceiver(
+                relationBroadcastReceiver,
+                RequestUtils.relationFilter);
     }
 
     @Override
@@ -257,6 +278,7 @@ public class MainActivity extends AppCompatActivity
 
         broadcastManager.unregisterReceiver(goalListBroadcastReceiver);
         broadcastManager.unregisterReceiver(profileBroadcastReceiver);
+        broadcastManager.unregisterReceiver(relationBroadcastReceiver);
     }
 
     @Override

@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.bryanlau.goalbuddiesandroid.Social.SocialContainer;
 import me.bryanlau.goalbuddiesandroid.Social.User;
 
 public class ProfileRequest {
@@ -31,7 +32,7 @@ public class ProfileRequest {
     private Intent profileIntent;
 
     public enum RELATION {
-        NONE, SELF, FRIENDS, INCOMING, OUTGOING
+        NONE, SELF, FRIENDS, INCOMING, OUTGOING, BLOCKING
     }
 
     private String username;
@@ -59,19 +60,21 @@ public class ProfileRequest {
                     JSONArray outgoingArray = jsonUser.getJSONArray("outgoing");
 
                     if(username.equals(preferences.getString("username", ""))) {
-                        for(int i = 0; i < friendsArray.length(); i++) {
+                        for (int i = 0; i < friendsArray.length(); i++) {
                             user.mFriends.add((String) friendsArray.get(i));
                         }
-                        for(int i = 0; i < incomingArray.length(); i++) {
+                        for (int i = 0; i < incomingArray.length(); i++) {
                             user.mIncoming.add((String) incomingArray.get(i));
                         }
 
                         JSONArray blockedArray = jsonUser.getJSONArray("blocked");
-                        for(int i = 0; i < blockedArray.length(); i++) {
+                        for (int i = 0; i < blockedArray.length(); i++) {
                             user.mBlocked.add((String) blockedArray.get(i));
                         }
 
                         relation = RELATION.SELF;
+                    } else if (SocialContainer.INSTANCE.blocked.contains(username)) {
+                        relation = RELATION.BLOCKING;
                     } else if (friendsArray.length() == 1) {
                         relation = RELATION.FRIENDS;
                     } else if (incomingArray.length() == 1) {

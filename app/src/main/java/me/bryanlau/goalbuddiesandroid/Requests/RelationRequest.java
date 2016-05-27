@@ -32,7 +32,7 @@ public class RelationRequest {
     private Intent relationIntent;
 
     public enum REQUEST_TYPE {
-        REQUEST, ACCEPT, REJECT, CANCEL, BLOCK, UNFRIEND
+        REQUEST, ACCEPT, REJECT, CANCEL, BLOCK, UNFRIEND, UNBLOCK
     }
 
     private String username;
@@ -95,6 +95,9 @@ public class RelationRequest {
                 break;
             case UNFRIEND:
                 url += "/unfriend/";
+                break;
+            case UNBLOCK:
+                url += "/unblock/";
                 break;
             default:
                 relationIntent.putExtra("statusCode", HttpURLConnection.HTTP_BAD_REQUEST);

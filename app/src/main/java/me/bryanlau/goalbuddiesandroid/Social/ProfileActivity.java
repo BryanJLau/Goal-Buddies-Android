@@ -185,6 +185,9 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),
                         extras.getString("error"),
                         Toast.LENGTH_LONG).show();
+            } else if (extras.getSerializable("requestType") == RelationRequest.REQUEST_TYPE.BLOCK) {
+                // Shouldn't show the profile anymore, go back
+                finish();
             }
 
             // Need to refresh the menu and such anyway regardless
