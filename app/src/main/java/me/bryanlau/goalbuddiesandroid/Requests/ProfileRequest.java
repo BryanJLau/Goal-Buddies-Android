@@ -63,7 +63,7 @@ public class ProfileRequest {
                     JSONArray incomingArray = relationships.getJSONArray("incoming");
                     JSONArray outgoingArray = relationships.getJSONArray("outgoing");
 
-                    if(username.equals(preferences.getString("username", ""))) {
+                    if (username.equals(preferences.getString("username", ""))) {
                         for (int i = 0; i < friendsArray.length(); i++) {
                             user.mFriends.add((String) friendsArray.get(i));
                         }
@@ -103,6 +103,7 @@ public class ProfileRequest {
             }
         };
     }
+
     private Response.ErrorListener errorListener() {
         return new Response.ErrorListener() {
             @Override

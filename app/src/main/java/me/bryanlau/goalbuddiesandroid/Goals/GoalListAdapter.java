@@ -52,9 +52,9 @@ public class GoalListAdapter extends ArrayAdapter<Goal> {
             cal.setTime(new Date());
             cal.add(Calendar.DATE, 3);
 
-            if(date.before(new Date()) && values.get(position).m_pending) {
+            if (date.before(new Date()) && values.get(position).m_pending) {
                 rowView.setBackgroundColor(Color.RED);
-            } else if(date.before(cal.getTime()) && values.get(position).m_pending) {
+            } else if (date.before(cal.getTime()) && values.get(position).m_pending) {
                 rowView.setBackgroundColor(Color.YELLOW);
             }
 

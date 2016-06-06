@@ -3,18 +3,13 @@ package me.bryanlau.goalbuddiesandroid.Social;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,7 +20,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,7 +36,6 @@ import java.util.List;
 
 import me.bryanlau.goalbuddiesandroid.Goals.Goal;
 import me.bryanlau.goalbuddiesandroid.Goals.GoalListAdapter;
-import me.bryanlau.goalbuddiesandroid.MainActivity;
 import me.bryanlau.goalbuddiesandroid.R;
 import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.MotivationRequest;
@@ -90,11 +83,11 @@ public class ProfileActivity extends AppCompatActivity {
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isOk(statusCode)) {
+            if (RequestUtils.isOk(statusCode)) {
                 showProgress(false);
 
                 mUser = extras.getParcelable("user");
-                if(mUser == null) {
+                if (mUser == null) {
                     finish();
                 }
 
@@ -104,7 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
                         (ProfileRequest.RELATION) intent.getSerializableExtra("relation");
                 invalidateOptionsMenu();
 
-                if(relation == ProfileRequest.RELATION.FRIENDS) {
+                if (relation == ProfileRequest.RELATION.FRIENDS) {
                     new GoalListRequest.Builder(getApplicationContext())
                             .username(mUser.mUsername)
                             .build()
@@ -112,8 +105,8 @@ public class ProfileActivity extends AppCompatActivity {
                 }
 
                 refreshFragments();
-            } else if(RequestUtils.isBad(statusCode)) {
-                switch(statusCode) {
+            } else if (RequestUtils.isBad(statusCode)) {
+                switch (statusCode) {
                     case HttpURLConnection.HTTP_NOT_FOUND:
                         Toast.makeText(getApplicationContext(),
                                 "User not found.",
@@ -141,12 +134,12 @@ public class ProfileActivity extends AppCompatActivity {
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isOk(statusCode)) {
+            if (RequestUtils.isOk(statusCode)) {
                 mRecurring = extras.getParcelableArrayList("pendingRecurring");
                 mOnetime = extras.getParcelableArrayList("pendingOneTime");
 
                 refreshFragments();
-            } else if(RequestUtils.isBad(statusCode)) {
+            } else if (RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
                 // in case password was changed
@@ -164,7 +157,7 @@ public class ProfileActivity extends AppCompatActivity {
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isBad(statusCode)) {
+            if (RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
                 // in case password was changed
@@ -187,7 +180,7 @@ public class ProfileActivity extends AppCompatActivity {
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isBad(statusCode)) {
+            if (RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
                 // in case password was changed
@@ -209,7 +202,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         MenuItem[] menuButtons = {null, null};
 
-        if(relation != null) {
+        if (relation != null) {
             switch (relation) {
                 case FRIENDS:
                     menuButtons[0] = menu.findItem(R.id.action_unfriend);
@@ -243,7 +236,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if(getSupportActionBar() != null)
+        if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -252,11 +245,11 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Set up the ViewPager with the sections adapter.
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
-        if(mViewPager != null)
+        if (mViewPager != null)
             mViewPager.setAdapter(mSectionsPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        if(tabLayout != null)
+        if (tabLayout != null)
             tabLayout.setupWithViewPager(mViewPager);
 
         relation = ProfileRequest.RELATION.NONE;
@@ -347,7 +340,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         RelationRequest request = null;
 
-        switch(id) {
+        switch (id) {
             case R.id.action_request:
                 request = new RelationRequest(this, username, RelationRequest.REQUEST_TYPE.REQUEST);
                 break;
@@ -368,7 +361,7 @@ public class ProfileActivity extends AppCompatActivity {
                 break;
         }
 
-        if(request != null)
+        if (request != null)
             request.execute();
 
         return super.onOptionsItemSelected(item);
@@ -450,7 +443,7 @@ public class ProfileActivity extends AppCompatActivity {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
-            switch(position) {
+            switch (position) {
                 case 1:
                     goalList = mRecurring != null ? mRecurring : new ArrayList<Goal>();
                     break;
@@ -477,13 +470,13 @@ public class ProfileActivity extends AppCompatActivity {
 
             // Only handle one-time goals for motivations, no interactions for
             // recurring goals
-            if(goalList == mOnetime) {
+            if (goalList == mOnetime) {
                 AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
 
                 alert.setTitle(R.string.dialog_profile_motivate_goal_title);
                 alert.setMessage(
                         getString(R.string.dialog_profile_motivate_goal_body) +
-                        "\n\n" + mOnetime.get(position).m_description
+                                "\n\n" + mOnetime.get(position).m_description
                 );
 
                 alert.setPositiveButton("Motivate!", new DialogInterface.OnClickListener() {
@@ -529,7 +522,7 @@ public class ProfileActivity extends AppCompatActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
-            if(relation == ProfileRequest.RELATION.FRIENDS) {
+            if (relation == ProfileRequest.RELATION.FRIENDS) {
                 View nameLayout = rootView.findViewById(R.id.profile_section_name);
                 if (nameLayout != null)
                     nameLayout.setVisibility(View.VISIBLE);
@@ -542,7 +535,7 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
 
-            if(mUser != null) {
+            if (mUser != null) {
                 TextView usernameView =
                         (TextView) rootView.findViewById(R.id.profile_section_body_username);
                 if (usernameView != null) {
@@ -583,7 +576,7 @@ public class ProfileActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            switch(position) {
+            switch (position) {
                 case 0:
                     return ProfileFragment.newInstance();
                 default:

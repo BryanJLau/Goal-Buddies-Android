@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.bryanlau.goalbuddiesandroid.Goals.Goal;
-import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
 
 public class GoalListRequest {
     private SharedPreferences preferences;
@@ -34,6 +33,7 @@ public class GoalListRequest {
 
     // Optional Parameters
     private final String username;
+
     private Response.Listener<JSONObject> goalListSuccessListener() {
         return new Response.Listener<JSONObject>() {
             @Override
@@ -41,7 +41,7 @@ public class GoalListRequest {
                 try {
                     JSONArray pendingRecurring = response.getJSONArray("pendingRecurring");
                     ArrayList<Goal> pendingRecurringArrayList = new ArrayList<>();
-                    for(int i = 0; i < pendingRecurring.length(); i++) {
+                    for (int i = 0; i < pendingRecurring.length(); i++) {
                         pendingRecurringArrayList.add(
                                 new Goal((JSONObject) pendingRecurring.get(i))
                         );
@@ -51,7 +51,7 @@ public class GoalListRequest {
 
                     JSONArray pendingOneTime = response.getJSONArray("pendingOneTime");
                     ArrayList<Goal> pendingOneTimeArrayList = new ArrayList<>();
-                    for(int i = 0; i < pendingOneTime.length(); i++) {
+                    for (int i = 0; i < pendingOneTime.length(); i++) {
                         pendingOneTimeArrayList.add(
                                 new Goal((JSONObject) pendingOneTime.get(i))
                         );
@@ -59,10 +59,10 @@ public class GoalListRequest {
                     goalListIntent.putParcelableArrayListExtra(
                             "pendingOneTime", pendingOneTimeArrayList);
 
-                    if(username.equals("")) {
+                    if (username.equals("")) {
                         JSONArray finishedRecurring = response.getJSONArray("finishedRecurring");
                         ArrayList<Goal> finishedRecurringArrayList = new ArrayList<>();
-                        for(int i = 0; i < finishedRecurring.length(); i++) {
+                        for (int i = 0; i < finishedRecurring.length(); i++) {
                             pendingRecurringArrayList.add(
                                     new Goal((JSONObject) finishedRecurring.get(i))
                             );
@@ -72,7 +72,7 @@ public class GoalListRequest {
 
                         JSONArray finishedOneTime = response.getJSONArray("finishedOneTime");
                         ArrayList<Goal> finishedOneTimeArrayList = new ArrayList<>();
-                        for(int i = 0; i < finishedOneTime.length(); i++) {
+                        for (int i = 0; i < finishedOneTime.length(); i++) {
                             finishedOneTimeArrayList.add(
                                     new Goal((JSONObject) finishedOneTime.get(i))
                             );
@@ -82,7 +82,7 @@ public class GoalListRequest {
 
                         JSONArray major = response.getJSONArray("major");
                         ArrayList<Goal> majorArrayList = new ArrayList<>();
-                        for(int i = 0; i < major.length(); i++) {
+                        for (int i = 0; i < major.length(); i++) {
                             majorArrayList.add(
                                     new Goal((JSONObject) major.get(i))
                             );
@@ -146,12 +146,12 @@ public class GoalListRequest {
 
     private GoalListRequest(Builder builder) {
         // Required parameters
-        preferences         = builder.preferences;
-        queue               = builder.queue;
-        broadcastManager    = builder.broadcastManager;
+        preferences = builder.preferences;
+        queue = builder.queue;
+        broadcastManager = builder.broadcastManager;
 
         // Optional parameters
-        username    = builder.username;
+        username = builder.username;
 
         goalListIntent = new Intent(RequestUtils.goalListAction);
     }

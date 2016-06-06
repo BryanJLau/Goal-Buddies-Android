@@ -3,7 +3,6 @@ package me.bryanlau.goalbuddiesandroid;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,7 +36,6 @@ import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
 import me.bryanlau.goalbuddiesandroid.Goals.MainGoalFragment;
 import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
-import me.bryanlau.goalbuddiesandroid.Requests.RelationRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
 import me.bryanlau.goalbuddiesandroid.Social.MainSocialFragment;
 import me.bryanlau.goalbuddiesandroid.Social.ProfileActivity;
@@ -91,7 +89,7 @@ public class MainActivity extends AppCompatActivity
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isOk(statusCode)) {
+            if (RequestUtils.isOk(statusCode)) {
                 ArrayList<Goal> pendingRecurring =
                         extras.getParcelableArrayList("pendingRecurring");
                 ArrayList<Goal> pendingOneTime =
@@ -111,11 +109,11 @@ public class MainActivity extends AppCompatActivity
 
                 refreshFragments();
                 View mainContent = findViewById(R.id.main_content);
-                if(mainContent != null) {
+                if (mainContent != null) {
                     Snackbar.make(mainContent, "Refreshed", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
-            } else if(RequestUtils.isBad(statusCode)) {
+            } else if (RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
                 // in case password was changed
@@ -133,10 +131,10 @@ public class MainActivity extends AppCompatActivity
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isOk(statusCode)) {
+            if (RequestUtils.isOk(statusCode)) {
                 User user = extras.getParcelable("user");
 
-                if(user != null) {
+                if (user != null) {
                     SocialContainer.INSTANCE.friends = user.mFriends;
                     SocialContainer.INSTANCE.incoming = user.mIncoming;
                     SocialContainer.INSTANCE.blocked = user.mBlocked;
@@ -144,11 +142,11 @@ public class MainActivity extends AppCompatActivity
 
                 refreshFragments();
                 View mainContent = findViewById(R.id.main_content);
-                if(mainContent != null) {
+                if (mainContent != null) {
                     Snackbar.make(mainContent, "Refreshed", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
-            } else if(RequestUtils.isBad(statusCode)) {
+            } else if (RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
                 // in case password was changed
@@ -166,7 +164,7 @@ public class MainActivity extends AppCompatActivity
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isOk(statusCode)) {
+            if (RequestUtils.isOk(statusCode)) {
                 profileRequest.execute();
             } else {
                 // Unblock failed
@@ -185,7 +183,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         addGoalFab = (FloatingActionButton) findViewById(R.id.addGoalFab);
-        if(addGoalFab != null)
+        if (addGoalFab != null)
             addGoalFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -194,7 +192,7 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         searchUsernameFab = (FloatingActionButton) findViewById(R.id.searchUsernameFab);
-        if(searchUsernameFab != null)
+        if (searchUsernameFab != null)
             searchUsernameFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -206,12 +204,12 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        if(drawer != null)
+        if (drawer != null)
             drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if(navigationView != null)
+        if (navigationView != null)
             navigationView.setNavigationItemSelectedListener(this);
 
         // Create the adapter that will return a fragment for each of the three
@@ -222,10 +220,10 @@ public class MainActivity extends AppCompatActivity
 
         // Set up the ViewPager with the sections adapter.
         mGoalViewPager = (ViewPager) findViewById(R.id.goalViewPager);
-        if(mGoalViewPager != null)
+        if (mGoalViewPager != null)
             mGoalViewPager.setAdapter(mGoalSectionsPagerAdapter);
         mSocialViewPager = (ViewPager) findViewById(R.id.socialViewPager);
-        if(mSocialViewPager != null)
+        if (mSocialViewPager != null)
             mSocialViewPager.setAdapter(mSocialSectionsPagerAdapter);
 
         goalListRequest = new GoalListRequest.Builder(getApplicationContext()).build();
@@ -313,13 +311,13 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         ViewPager mViewPager;
 
-        switch(id) {
+        switch (id) {
             default:
             case R.id.nav_current_recurring:
             case R.id.nav_current_onetime:
             case R.id.nav_finished_recurring:
             case R.id.nav_finished_onetime:
-                if(!currentPageGoals) {
+                if (!currentPageGoals) {
                     currentPageGoals = true;
                     mSocialViewPager.setVisibility(View.GONE);
                     mGoalViewPager.setVisibility(View.VISIBLE);
@@ -334,7 +332,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_friends:
             case R.id.nav_incoming:
             case R.id.nav_blocked:
-                if(currentPageGoals) {
+                if (currentPageGoals) {
                     currentPageGoals = false;
                     mGoalViewPager.setVisibility(View.GONE);
                     mSocialViewPager.setVisibility(View.VISIBLE);
@@ -361,7 +359,7 @@ public class MainActivity extends AppCompatActivity
 
         int currentPosition;
 
-        switch(id) {
+        switch (id) {
             default:
             case R.id.nav_current_recurring:
             case R.id.nav_friends:
@@ -382,13 +380,13 @@ public class MainActivity extends AppCompatActivity
         mViewPager.setCurrentItem(currentPosition, true);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if(drawer != null)
+        if (drawer != null)
             drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri){
+    public void onFragmentInteraction(Uri uri) {
         //you can leave it empty
     }
 

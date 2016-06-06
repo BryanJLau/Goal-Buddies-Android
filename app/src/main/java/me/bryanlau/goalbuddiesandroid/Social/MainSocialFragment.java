@@ -3,7 +3,6 @@ package me.bryanlau.goalbuddiesandroid.Social;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,15 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import me.bryanlau.goalbuddiesandroid.Goals.MainGoalFragment;
 import me.bryanlau.goalbuddiesandroid.R;
-import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RelationRequest;
 
 
@@ -76,7 +72,7 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        switch(position) {
+        switch (position) {
             case 0:
                 socialList = SocialContainer.INSTANCE.friends;
                 break;
@@ -105,7 +101,7 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
     public void onListItemClick(ListView l, View v, final int position, long id) {
         String username = socialList.get(position);
 
-        if(SocialContainer.INSTANCE.blocked.contains(username)) {
+        if (SocialContainer.INSTANCE.blocked.contains(username)) {
             AlertDialog.Builder alert = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.myDialog));
 
             alert.setTitle(R.string.dialog_username_search_title);
@@ -120,15 +116,15 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
                                     socialList.get(position),
                                     RelationRequest.REQUEST_TYPE.UNBLOCK).execute();
                         }
-            });
+                    });
 
             alert.setNegativeButton(
                     getResources().getString(R.string.profile_menu_cancel_friend),
                     new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
+                        public void onClick(DialogInterface dialog, int whichButton) {
 
-                }
-            });
+                        }
+                    });
             alert.show();
         } else {
             Intent i = new Intent(getActivity(), ProfileActivity.class);
@@ -167,7 +163,7 @@ public class MainSocialFragment extends android.support.v4.app.ListFragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
+     * <p/>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.

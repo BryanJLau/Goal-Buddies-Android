@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +16,8 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 
 public final class RequestUtils {
-    private RequestUtils() {}    // Purely static class
+    private RequestUtils() {
+    }    // Purely static class
 
     public static String goalListAction = "goalbuddies.goalList";
     public static String profileAction = "goalbuddies.profile";

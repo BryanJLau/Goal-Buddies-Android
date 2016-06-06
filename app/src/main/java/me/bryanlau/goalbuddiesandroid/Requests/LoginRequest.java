@@ -67,7 +67,7 @@ public class LoginRequest {
     }
 
     public void execute(Context context, String username, String password) {
-        if(!RequestUtils.isNetworkAvailable(context)) {
+        if (!RequestUtils.isNetworkAvailable(context)) {
             Intent loginIntent = new Intent("goalbuddies.login");
             loginIntent.putExtra("statusCode", HttpURLConnection.HTTP_BAD_REQUEST);
             loginIntent.putExtra("error", "Please enable your internet connection.");
@@ -90,11 +90,11 @@ public class LoginRequest {
             JsonObjectRequest loginRequest = (JsonObjectRequest)
                     RequestUtils.setTimeout(
                             new JsonObjectRequest(
-                                Request.Method.POST,
-                                "http://goalbuddies.bryanlau.me/api/users/login",
-                                postParameters,
-                                loginSuccessListener(),
-                                loginErrorListener()
+                                    Request.Method.POST,
+                                    "http://goalbuddies.bryanlau.me/api/users/login",
+                                    postParameters,
+                                    loginSuccessListener(),
+                                    loginErrorListener()
                             )
                     );
 

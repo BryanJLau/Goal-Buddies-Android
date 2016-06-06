@@ -67,7 +67,7 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
 
         ArrayList<Goal> goalList;
 
-        switch(position) {
+        switch (position) {
             case 0:
                 goalList = GoalContainer.INSTANCE.getPendingRecurring();
                 break;
@@ -129,7 +129,7 @@ public class MainGoalFragment extends android.support.v4.app.ListFragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
+     * <p/>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.

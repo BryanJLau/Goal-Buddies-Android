@@ -7,14 +7,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -34,14 +33,14 @@ public class AddGoalActivity extends AppCompatActivity {
             showProgress(false);
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isOk(statusCode)) {
+            if (RequestUtils.isOk(statusCode)) {
                 Toast.makeText(
                         getApplicationContext(),
                         getString(R.string.add_goal_success),
                         Toast.LENGTH_LONG
                 ).show();
                 finish();
-            } else if(RequestUtils.isBad(statusCode)) {
+            } else if (RequestUtils.isBad(statusCode)) {
                 // Unauthorized, expired token most likely
                 // For simplicity, just redirect to login screen
                 // in case password was changed
@@ -67,22 +66,22 @@ public class AddGoalActivity extends AppCompatActivity {
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(this,
                 R.array.add_goal_type_array, android.R.layout.simple_spinner_item);
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        if(typeSpinner != null)
+        if (typeSpinner != null)
             typeSpinner.setAdapter(typeAdapter);
 
         final Spinner iconSpinner = (Spinner) findViewById(R.id.add_goal_section_body_icon);
         ArrayAdapter<CharSequence> iconAdapter = ArrayAdapter.createFromResource(this,
                 R.array.add_goal_icon_array, android.R.layout.simple_spinner_item);
         iconAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        if(iconSpinner != null)
+        if (iconSpinner != null)
             iconSpinner.setAdapter(iconAdapter);
 
         Button submitButton = (Button) findViewById(R.id.add_goal_section_button_submit);
-        if(submitButton != null)
+        if (submitButton != null)
             submitButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(daysToFinishEditText != null && descriptionEditText != null
+                    if (daysToFinishEditText != null && descriptionEditText != null
                             && typeSpinner != null && iconSpinner != null) {
                         AddGoalRequest request = new AddGoalRequest(
                                 getApplicationContext(),

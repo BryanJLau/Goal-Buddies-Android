@@ -38,6 +38,7 @@ public class AddGoalRequest {
             }
         };
     }
+
     private Response.ErrorListener errorListener() {
         return new Response.ErrorListener() {
             @Override
@@ -73,10 +74,10 @@ public class AddGoalRequest {
         StringRequest request = (StringRequest)
                 RequestUtils.setTimeout(
                         new StringRequest(
-                            Request.Method.POST,
-                            url,
-                            successListener(),
-                            errorListener()
+                                Request.Method.POST,
+                                url,
+                                successListener(),
+                                errorListener()
                         ) {
                             protected Map<String, String> getParams()
                                     throws com.android.volley.AuthFailureError {

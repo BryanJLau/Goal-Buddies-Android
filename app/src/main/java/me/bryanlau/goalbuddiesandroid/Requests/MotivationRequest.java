@@ -11,12 +11,8 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.util.HashMap;
@@ -40,6 +36,7 @@ public class MotivationRequest {
             }
         };
     }
+
     private Response.ErrorListener errorListener() {
         return new Response.ErrorListener() {
             @Override
@@ -73,10 +70,10 @@ public class MotivationRequest {
         StringRequest request = (StringRequest)
                 RequestUtils.setTimeout(
                         new StringRequest(
-                            Request.Method.POST,
-                            url,
-                            successListener(),
-                            errorListener()
+                                Request.Method.POST,
+                                url,
+                                successListener(),
+                                errorListener()
                         ) {
                             protected Map<String, String> getParams()
                                     throws com.android.volley.AuthFailureError {

@@ -34,10 +34,10 @@ public class LoginActivity extends AppCompatActivity {
             Bundle extras = intent.getExtras();
 
             int statusCode = extras.getInt("statusCode");
-            if(RequestUtils.isOk(statusCode)) {
+            if (RequestUtils.isOk(statusCode)) {
                 Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(i);
-            } else if(RequestUtils.isBad(statusCode)) {
+            } else if (RequestUtils.isBad(statusCode)) {
                 mUsernameView.setError(extras.getString("error"));
             }
         }
@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences preferences =
                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        if(preferences.contains("token")) {
+        if (preferences.contains("token")) {
             Intent i = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(i);
         }
@@ -80,13 +80,13 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        if(mEmailSignInButton != null)
+        if (mEmailSignInButton != null)
             mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
+                @Override
+                public void onClick(View view) {
+                    attemptLogin();
+                }
+            });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
