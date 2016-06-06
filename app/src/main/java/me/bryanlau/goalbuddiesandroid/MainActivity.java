@@ -53,10 +53,7 @@ public class MainActivity extends AppCompatActivity
     private ViewPager mGoalViewPager, mSocialViewPager;
     private FloatingActionButton addGoalFab, searchUsernameFab;
 
-    private GoalListRequest pendingRecurringRequest;
-    private GoalListRequest pendingOneTimeRequest;
-    private GoalListRequest finishedRecurringRequest;
-    private GoalListRequest finishedOneTimeRequest;
+    private GoalListRequest goalListRequest;
     private ProfileRequest profileRequest;
 
     private boolean currentPageGoals;
@@ -94,13 +91,22 @@ public class MainActivity extends AppCompatActivity
 
             int statusCode = extras.getInt("statusCode");
             if(RequestUtils.isOk(statusCode)) {
-                ArrayList<Goal> goalArrayList = extras.getParcelableArrayList("goalList");
-                if(goalArrayList != null) {
-                    for (int i = 0; i < goalArrayList.size(); i++) {
-                        Goal goal = goalArrayList.get(i);
-                        GoalContainer.INSTANCE.addGoal(goal);
-                    }
-                }
+                ArrayList<Goal> pendingRecurring =
+                        extras.getParcelableArrayList("pendingRecurring");
+                ArrayList<Goal> pendingOneTime =
+                        extras.getParcelableArrayList("pendingOneTime");
+                ArrayList<Goal> finishedRecurring =
+                        extras.getParcelableArrayList("finishedRecurring");
+                ArrayList<Goal> finishedOneTime =
+                        extras.getParcelableArrayList("finishedOneTime");
+                ArrayList<Goal> major =
+                        extras.getParcelableArrayList("major");
+                GoalContainer.INSTANCE
+                        .setPendingRecurring(pendingRecurring)
+                        .setPendingOneTime(pendingOneTime)
+                        .setFinishedRecurring(finishedRecurring)
+                        .setFinishedOneTime(finishedOneTime)
+                        .setMajor(major);
 
                 refreshFragments();
                 View mainContent = findViewById(R.id.main_content);
@@ -221,22 +227,7 @@ public class MainActivity extends AppCompatActivity
         if(mSocialViewPager != null)
             mSocialViewPager.setAdapter(mSocialSectionsPagerAdapter);
 
-        pendingRecurringRequest = new GoalListRequest.Builder(getApplicationContext())
-                .pending(true)
-                .type(0)
-                .build();
-        pendingOneTimeRequest = new GoalListRequest.Builder(getApplicationContext())
-                .pending(true)
-                .type(1)
-                .build();
-        finishedRecurringRequest = new GoalListRequest.Builder(getApplicationContext())
-                .pending(false)
-                .type(0)
-                .build();
-        finishedOneTimeRequest = new GoalListRequest.Builder(getApplicationContext())
-                .pending(false)
-                .type(1)
-                .build();
+        goalListRequest = new GoalListRequest.Builder(getApplicationContext()).build();
         profileRequest = new ProfileRequest(getApplicationContext());
 
         broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
@@ -265,10 +256,7 @@ public class MainActivity extends AppCompatActivity
     public void onPostResume() {
         super.onPostResume();
 
-        pendingRecurringRequest.execute();
-        pendingOneTimeRequest.execute();
-        finishedRecurringRequest.execute();
-        finishedOneTimeRequest.execute();
+        goalListRequest.execute();
         profileRequest.execute();
     }
 
@@ -310,10 +298,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
-            pendingRecurringRequest.execute();
-            pendingOneTimeRequest.execute();
-            finishedRecurringRequest.execute();
-            finishedOneTimeRequest.execute();
+            goalListRequest.execute();
             profileRequest.execute();
             return true;
         }

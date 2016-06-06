@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.bryanlau.goalbuddiesandroid.Goals.Goal;
+import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
 
 public class GoalListRequest {
     private SharedPreferences preferences;
@@ -33,27 +34,65 @@ public class GoalListRequest {
 
     // Optional Parameters
     private final String username;
-    private final boolean pending;
-    private final int type;
-    private final int limit;
-    private final int offset;
-    private final int version;
-
     private Response.Listener<JSONObject> goalListSuccessListener() {
         return new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    ArrayList<Goal> goalArrayList = new ArrayList<>();
-                    JSONArray goalsArray = response.getJSONArray("goals");
+                    JSONArray pendingRecurring = response.getJSONArray("pendingRecurring");
+                    ArrayList<Goal> pendingRecurringArrayList = new ArrayList<>();
+                    for(int i = 0; i < pendingRecurring.length(); i++) {
+                        pendingRecurringArrayList.add(
+                                new Goal((JSONObject) pendingRecurring.get(i))
+                        );
+                    }
+                    goalListIntent.putParcelableArrayListExtra(
+                            "pendingRecurring", pendingRecurringArrayList);
 
-                    for (int i = 0; i < goalsArray.length(); i++) {
-                        goalArrayList.add(new Goal(goalsArray.getJSONObject(i)));
+                    JSONArray pendingOneTime = response.getJSONArray("pendingOneTime");
+                    ArrayList<Goal> pendingOneTimeArrayList = new ArrayList<>();
+                    for(int i = 0; i < pendingOneTime.length(); i++) {
+                        pendingOneTimeArrayList.add(
+                                new Goal((JSONObject) pendingOneTime.get(i))
+                        );
+                    }
+                    goalListIntent.putParcelableArrayListExtra(
+                            "pendingOneTime", pendingOneTimeArrayList);
+
+                    if(username.equals("")) {
+                        JSONArray finishedRecurring = response.getJSONArray("finishedRecurring");
+                        ArrayList<Goal> finishedRecurringArrayList = new ArrayList<>();
+                        for(int i = 0; i < finishedRecurring.length(); i++) {
+                            pendingRecurringArrayList.add(
+                                    new Goal((JSONObject) finishedRecurring.get(i))
+                            );
+                        }
+                        goalListIntent.putParcelableArrayListExtra(
+                                "finishedRecurring", finishedRecurringArrayList);
+
+                        JSONArray finishedOneTime = response.getJSONArray("finishedOneTime");
+                        ArrayList<Goal> finishedOneTimeArrayList = new ArrayList<>();
+                        for(int i = 0; i < finishedOneTime.length(); i++) {
+                            finishedOneTimeArrayList.add(
+                                    new Goal((JSONObject) finishedOneTime.get(i))
+                            );
+                        }
+                        goalListIntent.putParcelableArrayListExtra(
+                                "finishedOneTime", finishedOneTimeArrayList);
+
+                        JSONArray major = response.getJSONArray("major");
+                        ArrayList<Goal> majorArrayList = new ArrayList<>();
+                        for(int i = 0; i < major.length(); i++) {
+                            majorArrayList.add(
+                                    new Goal((JSONObject) major.get(i))
+                            );
+                        }
+                        goalListIntent.putParcelableArrayListExtra(
+                                "major", majorArrayList);
                     }
 
                     // Send the broadcast so that the MainActivity knows
                     goalListIntent.putExtra("statusCode", HttpURLConnection.HTTP_OK);
-                    goalListIntent.putExtra("goalList", goalArrayList);
                     broadcastManager.sendBroadcast(goalListIntent);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -86,47 +125,17 @@ public class GoalListRequest {
         private LocalBroadcastManager broadcastManager;
 
         private String username;
-        private boolean pending = true;
-        private int type = 0;
-        private int limit = 10;
-        private int offset = 0;
-        private int version= 0;
 
         public Builder(Context context) {
             preferences = PreferenceManager.getDefaultSharedPreferences(context);
             queue = Volley.newRequestQueue(context);
             broadcastManager = LocalBroadcastManager.getInstance(context);
 
-            username = preferences.getString("username", "");
+            username = "";
         }
 
         public Builder username(String username) {
             this.username = username;
-            return this;
-        }
-
-        public Builder pending(boolean pending) {
-            this.pending = pending;
-            return this;
-        }
-
-        public Builder type(int type) {
-            this.type = type;
-            return this;
-        }
-
-        public Builder limit(int limit) {
-            this.limit = limit;
-            return this;
-        }
-
-        public Builder offset(int offset) {
-            this.offset = offset;
-            return this;
-        }
-
-        public Builder version(int version) {
-            this.version = version;
             return this;
         }
 
@@ -143,23 +152,13 @@ public class GoalListRequest {
 
         // Optional parameters
         username    = builder.username;
-        pending     = builder.pending;
-        type        = builder.type;
-        limit       = builder.limit;
-        offset      = builder.offset;
-        version     = builder.version;
 
         goalListIntent = new Intent(RequestUtils.goalListAction);
     }
 
     public void execute() {
         // Build the URL based on the parameters given
-        String url = "http://goalbuddies.bryanlau.me/api/goals/list/" + username +
-                "?pending=" + Boolean.toString(pending) +
-                "&type=" + Integer.toString(type) +
-                "&limit=" + Integer.toString(limit) +
-                "&offset=" + Integer.toString(offset) +
-                "&version=" + Integer.toString(version);
+        String url = "http://goalbuddies.bryanlau.me/api/goals/list/" + username;
 
         JsonObjectRequest goalListRequest = (JsonObjectRequest)
                 RequestUtils.setTimeout(

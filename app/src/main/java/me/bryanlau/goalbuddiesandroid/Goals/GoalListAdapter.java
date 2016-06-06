@@ -44,7 +44,7 @@ public class GoalListAdapter extends ArrayAdapter<Goal> {
         SimpleDateFormat cleanFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
         try {
-            Date date = format.parse(values.get(position).m_eta);
+            Date date = format.parse(values.get(position).m_finished);
             String etaString = "ETA : " + cleanFormat.format(date);
             etaTextView.setText(etaString);
 

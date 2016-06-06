@@ -104,14 +104,6 @@ public class ProfileActivity extends AppCompatActivity {
 
                 if(relation == ProfileRequest.RELATION.FRIENDS) {
                     new GoalListRequest.Builder(getApplicationContext())
-                            .pending(true)
-                            .type(0)
-                            .username(mUser.mUsername)
-                            .build()
-                            .execute();
-                    new GoalListRequest.Builder(getApplicationContext())
-                            .pending(true)
-                            .type(1)
                             .username(mUser.mUsername)
                             .build()
                             .execute();
@@ -148,16 +140,8 @@ public class ProfileActivity extends AppCompatActivity {
 
             int statusCode = extras.getInt("statusCode");
             if(RequestUtils.isOk(statusCode)) {
-                ArrayList<Goal> goalArrayList = extras.getParcelableArrayList("goalList");
-                if(goalArrayList != null) {
-                    for (int i = 0; i < goalArrayList.size(); i++) {
-                        Goal goal = goalArrayList.get(i);
-                        if(goal.m_type == 0)
-                            mRecurring.add(goal);
-                        else
-                            mOnetime.add(goal);
-                    }
-                }
+                mRecurring = extras.getParcelableArrayList("pendingRecurring");
+                mOnetime = extras.getParcelableArrayList("pendingOneTime");
 
                 refreshFragments();
             } else if(RequestUtils.isBad(statusCode)) {

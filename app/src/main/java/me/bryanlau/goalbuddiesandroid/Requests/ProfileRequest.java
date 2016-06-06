@@ -45,19 +45,23 @@ public class ProfileRequest {
             public void onResponse(JSONObject response) {
                 try {
                     JSONObject jsonUser = response.getJSONObject("user");
+                    JSONObject personal = jsonUser.getJSONObject("personal");
+                    JSONObject statistics = jsonUser.getJSONObject("statistics");
+
                     user = new User(
                             jsonUser.getString("username"),
-                            jsonUser.getString("firstName"),
-                            jsonUser.getString("lastName"),
-                            jsonUser.getString("city"),
-                            jsonUser.getInt("goalsCompleted"),
-                            jsonUser.getInt("timesMotivated")
+                            personal.getString("firstName"),
+                            personal.getString("lastName"),
+                            personal.getString("city"),
+                            statistics.getInt("goalsCompleted"),
+                            statistics.getInt("motivationsGiven")
                     );
 
+                    JSONObject relationships = jsonUser.getJSONObject("relationships");
                     // These arrays only have 0 or 1 item
-                    JSONArray friendsArray = jsonUser.getJSONArray("friends");
-                    JSONArray incomingArray = jsonUser.getJSONArray("incoming");
-                    JSONArray outgoingArray = jsonUser.getJSONArray("outgoing");
+                    JSONArray friendsArray = relationships.getJSONArray("friends");
+                    JSONArray incomingArray = relationships.getJSONArray("incoming");
+                    JSONArray outgoingArray = relationships.getJSONArray("outgoing");
 
                     if(username.equals(preferences.getString("username", ""))) {
                         for (int i = 0; i < friendsArray.length(); i++) {
@@ -67,7 +71,7 @@ public class ProfileRequest {
                             user.mIncoming.add((String) incomingArray.get(i));
                         }
 
-                        JSONArray blockedArray = jsonUser.getJSONArray("blocked");
+                        JSONArray blockedArray = relationships.getJSONArray("blocking");
                         for (int i = 0; i < blockedArray.length(); i++) {
                             user.mBlocked.add((String) blockedArray.get(i));
                         }

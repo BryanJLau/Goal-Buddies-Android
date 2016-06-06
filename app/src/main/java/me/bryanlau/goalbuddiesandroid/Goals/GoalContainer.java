@@ -1,5 +1,8 @@
 package me.bryanlau.goalbuddiesandroid.Goals;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,73 +18,61 @@ public enum GoalContainer {
     private Map<String, Goal> pendingOneTime = new LinkedHashMap<>();
     private Map<String, Goal> finishedRecurring = new LinkedHashMap<>();
     private Map<String, Goal> finishedOneTime = new LinkedHashMap<>();
+    private Map<String, Goal> major = new LinkedHashMap<>();
 
-    public int version = 0;
-
+    // Return type for chaining
+    public GoalContainer setPendingRecurring(ArrayList<Goal> goals) {
+        pendingRecurring.clear();
+        for(int i = 0; i < goals.size(); i++) {
+            pendingRecurring.put(goals.get(i).m_id, goals.get(i));
+        }
+        return this;
+    }
     public ArrayList<Goal> getPendingRecurring() {
         return new ArrayList<>(pendingRecurring.values());
     }
 
+    public GoalContainer setPendingOneTime(ArrayList<Goal> goals) {
+        pendingOneTime.clear();
+        for(int i = 0; i < goals.size(); i++) {
+            pendingOneTime.put(goals.get(i).m_id, goals.get(i));
+        }
+        return this;
+    }
     public ArrayList<Goal> getPendingOneTime() {
         return new ArrayList<>(pendingOneTime.values());
     }
 
+    public GoalContainer setFinishedRecurring(ArrayList<Goal> goals) {
+        finishedRecurring.clear();
+        for(int i = 0; i < goals.size(); i++) {
+            finishedRecurring.put(goals.get(i).m_id, goals.get(i));
+        }
+        return this;
+    }
     public ArrayList<Goal> getFinishedRecurring() {
         return new ArrayList<>(finishedRecurring.values());
     }
 
+    public GoalContainer setFinishedOneTime(ArrayList<Goal> goals) {
+        finishedOneTime.clear();
+        for(int i = 0; i < goals.size(); i++) {
+            finishedOneTime.put(goals.get(i).m_id, goals.get(i));
+        }
+        return this;
+    }
     public ArrayList<Goal> getFinishedOneTime() {
         return new ArrayList<>(finishedOneTime.values());
     }
 
-    public void addGoal(Goal goal) {
-        if(goal.m_pending) {
-            if(goal.m_type == 0) {
-                pendingRecurring.put(goal.m_id, goal);
-            } else {
-                pendingOneTime.put(goal.m_id, goal);
-            }
-        } else {
-            if(goal.m_type == 0) {
-                finishedRecurring.put(goal.m_id, goal);
-            } else {
-                finishedOneTime.put(goal.m_id, goal);
-            }
+    public GoalContainer setMajor(ArrayList<Goal> goals) {
+        major.clear();
+        for(int i = 0; i < goals.size(); i++) {
+            major.put(goals.get(i).m_id, goals.get(i));
         }
+        return this;
     }
-
-    public void addGoal(JSONObject goal) {
-        try {
-            String id = goal.getString("_id");
-            int type = goal.getInt("type");
-            String description = goal.getString("description");
-            int version = goal.getInt("version");
-            int times = goal.getInt("times");
-            String finished = goal.getString("finished");
-            String eta = goal.getString("eta");
-            String created = goal.getString("created");
-            boolean unread = goal.getBoolean("unread");
-            boolean pending = goal.getBoolean("pending");
-            String icon = goal.getString("icon");
-
-            Goal g = new Goal(id, type, description, version, times,
-                    finished, eta, created, unread, pending, icon);
-
-            if(pending) {
-                if(type == 0) {
-                    pendingRecurring.put(id, g);
-                } else {
-                    pendingOneTime.put(id, g);
-                }
-            } else {
-                if(type == 0) {
-                    finishedRecurring.put(id, g);
-                } else {
-                    finishedOneTime.put(id, g);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public ArrayList<Goal> getMajor() {
+        return new ArrayList<>(major.values());
     }
 }
