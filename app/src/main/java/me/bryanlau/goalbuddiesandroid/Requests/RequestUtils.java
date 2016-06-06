@@ -22,9 +22,11 @@ public final class RequestUtils {
     public static String goalListAction = "goalbuddies.goalList";
     public static String profileAction = "goalbuddies.profile";
     public static String relationAction = "goalbuddies.relation";
+    public static String motivationAction = "goalbuddies.motivation";
     public static IntentFilter goalListFilter = new IntentFilter(goalListAction);
     public static IntentFilter profileFilter = new IntentFilter(profileAction);
     public static IntentFilter relationFilter = new IntentFilter(relationAction);
+    public static IntentFilter motivationFilter = new IntentFilter(motivationAction);
 
     public static boolean isOk(int statusCode) {
         return (statusCode >= 200 && statusCode < 300);

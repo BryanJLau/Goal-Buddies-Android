@@ -25,6 +25,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,6 +45,7 @@ import me.bryanlau.goalbuddiesandroid.Goals.GoalListAdapter;
 import me.bryanlau.goalbuddiesandroid.MainActivity;
 import me.bryanlau.goalbuddiesandroid.R;
 import me.bryanlau.goalbuddiesandroid.Requests.GoalListRequest;
+import me.bryanlau.goalbuddiesandroid.Requests.MotivationRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.ProfileRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RelationRequest;
 import me.bryanlau.goalbuddiesandroid.Requests.RequestUtils;
@@ -179,6 +181,28 @@ public class ProfileActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver motivationBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+
+            int statusCode = extras.getInt("statusCode");
+            if(RequestUtils.isBad(statusCode)) {
+                // Unauthorized, expired token most likely
+                // For simplicity, just redirect to login screen
+                // in case password was changed
+                Toast.makeText(getApplicationContext(),
+                        extras.getString("error"),
+                        Toast.LENGTH_LONG).show();
+            } else {
+                // Shouldn't show the profile anymore, go back
+                Toast.makeText(getApplicationContext(),
+                        "Thanks for supporting your peer!",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
@@ -291,6 +315,9 @@ public class ProfileActivity extends AppCompatActivity {
         broadcastManager.registerReceiver(
                 relationBroadcastReceiver,
                 RequestUtils.relationFilter);
+        broadcastManager.registerReceiver(
+                motivationBroadcastReceiver,
+                RequestUtils.motivationFilter);
     }
 
     @Override
@@ -300,6 +327,7 @@ public class ProfileActivity extends AppCompatActivity {
         broadcastManager.unregisterReceiver(goalListBroadcastReceiver);
         broadcastManager.unregisterReceiver(profileBroadcastReceiver);
         broadcastManager.unregisterReceiver(relationBroadcastReceiver);
+        broadcastManager.unregisterReceiver(motivationBroadcastReceiver);
     }
 
 
@@ -389,6 +417,7 @@ public class ProfileActivity extends AppCompatActivity {
          */
 
         private int position;
+        private ArrayList<Goal> goalList;
         private GoalListAdapter adapter;
 
         public GoalFragment() {
@@ -421,8 +450,6 @@ public class ProfileActivity extends AppCompatActivity {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
-            ArrayList<Goal> goalList;
-
             switch(position) {
                 case 1:
                     goalList = mRecurring != null ? mRecurring : new ArrayList<Goal>();
@@ -446,7 +473,36 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         public void onListItemClick(ListView l, View v, int position, long id) {
-            // TODO implement some logic
+            final int index = position;
+
+            // Only handle one-time goals for motivations, no interactions for
+            // recurring goals
+            if(goalList == mOnetime) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+
+                alert.setTitle(R.string.dialog_profile_motivate_goal_title);
+                alert.setMessage(
+                        getString(R.string.dialog_profile_motivate_goal_body) +
+                        "\n\n" + mOnetime.get(position).m_description
+                );
+
+                alert.setPositiveButton("Motivate!", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        MotivationRequest request = new MotivationRequest(
+                                getActivity(),
+                                mUser.mUsername,
+                                goalList.get(index).m_id
+                        );
+                        request.execute();
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    }
+                });
+                alert.show();
+            }
         }
     }
 
