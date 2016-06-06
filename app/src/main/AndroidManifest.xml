@@ -35,6 +35,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="me.bryanlau.goalbuddiesandroid.MainActivity" />
         </activity>
+        <activity android:name=".Goals.AddGoalActivity"></activity>
     </application>
 
 </manifest>

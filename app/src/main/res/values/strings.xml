@@ -37,6 +37,29 @@
     <string name="dialog_profile_motivate_goal_title">Motivation</string>
     <string name="dialog_profile_motivate_goal_body">Do you want to motivate this goal?</string>
 
+    <!-- Strings related to adding goals -->
+    <string name="add_goal_section_label_description">Description</string>
+    <string name="add_goal_section_label_type">Type</string>
+    <string name="add_goal_section_label_icon">Icon</string>
+    <string name="add_goal_section_label_days_to_finish">Days to Finish</string>
+    <string name="add_goal_success">Goal successfully added! Good luck!</string>
+    <string name="add_goal_section_button_submit">Submit Goal</string>
+    <string-array name="add_goal_type_array">
+        <item>Recurring</item>
+        <item>One-Time</item>
+    </string-array>
+    <string-array name="add_goal_icon_array">
+        <item>Star</item>
+        <item>Book</item>
+        <item>Cutlery</item>
+        <item>Home</item>
+        <item>USD</item>
+        <item>User</item>
+        <item>Education</item>
+        <item>Shopping Cart</item>
+        <item>Globe</item>
+    </string-array>
+
     <!-- Strings related to login -->
     <string name="login_prompt_username">Username</string>
     <string name="login_prompt_password">Password</string>

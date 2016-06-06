@@ -31,6 +31,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.bryanlau.goalbuddiesandroid.Goals.AddGoalActivity;
 import me.bryanlau.goalbuddiesandroid.Goals.Goal;
 import me.bryanlau.goalbuddiesandroid.Goals.GoalContainer;
 import me.bryanlau.goalbuddiesandroid.Goals.MainGoalFragment;
@@ -188,8 +189,8 @@ public class MainActivity extends AppCompatActivity
             addGoalFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    Intent i = new Intent(MainActivity.this, AddGoalActivity.class);
+                    startActivity(i);
                 }
             });
         searchUsernameFab = (FloatingActionButton) findViewById(R.id.searchUsernameFab);
